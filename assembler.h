@@ -33,5 +33,9 @@
 #define COMMENT 1
 #define DIRECTION 2
 #define OPERATION 3
+#define START_ADDR 100
+#define MAX_INPUT 32
+#define MEM_SIZE 4095
+#define CELL_SIZE 15
 
 #endif
