@@ -1,6 +1,8 @@
 
-#include "parser.c"
-#include "reader.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "assembler.h"
 
 int main(int argc, char* argv[]){
     char fileName[256], fileExt[6];
@@ -12,7 +14,7 @@ int main(int argc, char* argv[]){
         exit(0);
     }
     for(fileIndex = 1; fileIndex < argc; fileIndex++){
-        //Run assembler on each file after error checks
+        /*Run assembler on each file after error checks*/
         strcpy(fileName, argv[fileIndex]);
         strcat(fileName, ".as");
         inFile = fopen(argv[fileIndex], "r");
@@ -20,8 +22,9 @@ int main(int argc, char* argv[]){
             printf("ERROR: File name does not exist.\n");
         }
         else{
-            //parse file
+            /*parse file*/
             parseFile(inFile);
         }
     }
+    return 0;
 }

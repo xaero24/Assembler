@@ -1,18 +1,18 @@
-#ifndef MAIN_H_
-#define MAIN_H_
+#ifndef ASSEMBLER_H_
+#define ASSEMBLER_H_
 
-//Boolean operators
+/*Boolean operators*/
 #define TRUE 1
 #define FALSE 0
 
-//Opcodes group 1 - dual operands
+/*Opcodes group 1 - dual operands*/
 #define MOV 0
 #define CMP 1
 #define ADD 2
 #define SUB 3
 #define LEA 4
 
-//Opcodes group 2 - single operand
+/*Opcodes group 2 - single operand*/
 #define CLR 5
 #define NOT 6
 #define INC 7
@@ -23,11 +23,11 @@
 #define PRN 12
 #define JSR 13
 
-//Opcodes group 3 - no operands
+/*Opcodes group 3 - no operands*/
 #define RTS 14
 #define STOP 15
 
-//Various definitions for parsing
+/*Various definitions for parsing*/
 #define LINE_LEN 80
 #define BLANK_LINE 0
 #define COMMENT 1
@@ -37,5 +37,8 @@
 #define MAX_INPUT 32
 #define MEM_SIZE 4095
 #define CELL_SIZE 15
+
+void symTableCreator();
+int parseFile(FILE*);
 
 #endif
