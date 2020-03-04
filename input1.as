@@ -2,6 +2,9 @@
 .entry LENGTH
 .extern L3
 .extern W
+
+
+
 MAIN: mov K, W
 	 add r2, STR
 	mov #4, r4

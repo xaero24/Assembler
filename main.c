@@ -8,6 +8,8 @@ int main(int argc, char* argv[]){
     char fileName[256], fileExt[6];
     int fileIndex, fileNameLength;
     FILE* inFile = NULL;
+    codeNode* codeHead = NULL;
+    symNode* symHead = NULL;
 
     if(argc<2){
         printf("ERROR: No files were given.\n");
@@ -23,7 +25,9 @@ int main(int argc, char* argv[]){
         }
         else{
             /*parse file*/
-            parseFile(inFile);
+            codeHead = (codeNode*) malloc(siseof(codeHead));
+            symHead = (symNode*) malloc(siseof(symHead));
+            parseFile(inFile, codeHead, symHead);
         }
     }
     return 0;

@@ -38,7 +38,38 @@
 #define MEM_SIZE 4095
 #define CELL_SIZE 15
 
+/*Structures for parsing the file and building the symbol table*/
+typedef struct code_line
+{
+    char label [MAX_INPUT];
+    char operator [MAX_INPUT];
+    char operand1 [MAX_INPUT];
+    char operand2 [MAX_INPUT];
+} codeLine;
+
+typedef struct code_list
+{
+    codeLine* line;
+    struct codeNode* next;
+} codeNode;
+
+typedef struct{
+    char label[LINE_LEN];
+    int addr;
+} symTableLine;
+
+typedef struct table_list
+{
+    symTableLine* line;
+    struct symNode* next;
+} symNode;
+
+typedef struct{
+    int addr;
+    unsigned int binCode;
+} outputLine;
+
 void symTableCreator();
-int parseFile(FILE*);
+int parseFile(FILE*, codeNode*, symNode*);
 
 #endif
