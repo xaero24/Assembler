@@ -1,18 +1,29 @@
+/**/
+
 #ifndef ASSEMBLER_H_
 #define ASSEMBLER_H_
 
-/*Boolean operators*/
-#define TRUE 1
-#define FALSE 0
+/*Defining the operands in use*/
+#define OPERAND1 1
+#define OPERAND2 2
+#define OPERAND_3_AND_UP 3
 
-/*Opcodes group 1 - dual operands*/
+/*Definition of various checks*/
+#define NO_VALUE "0-NIL"
+
+/*Definitions of max length for the code parts*/
+#define MAX_INPUT 31
+#define MAX_OPERATOR 5
+#define MAX_STRING 81
+#define MAX_LINE_LENGTH 256
+
+/*Defining operator types*/
 #define MOV 0
 #define CMP 1
 #define ADD 2
 #define SUB 3
 #define LEA 4
 
-/*Opcodes group 2 - single operand*/
 #define CLR 5
 #define NOT 6
 #define INC 7
@@ -23,53 +34,56 @@
 #define PRN 12
 #define JSR 13
 
-/*Opcodes group 3 - no operands*/
 #define RTS 14
 #define STOP 15
 
-/*Various definitions for parsing*/
-#define LINE_LEN 80
-#define BLANK_LINE 0
-#define COMMENT 1
-#define DIRECTION 2
-#define OPERATION 3
-#define START_ADDR 100
-#define MAX_INPUT 32
-#define MEM_SIZE 4095
-#define CELL_SIZE 15
+/*Defining operator groups*/
+#define GROUP_1 1
+#define GROUP_2 2
+#define GROUP_3 3
 
-/*Structures for parsing the file and building the symbol table*/
-typedef struct code_line
+/*True and false statements definition*/
+#define TRUE 1
+#define FALSE 0
+
+/*Symbol table structure*/
+typedef struct
 {
-    char label [MAX_INPUT];
-    char operator [MAX_INPUT];
-    char operand1 [MAX_INPUT];
-    char operand2 [MAX_INPUT];
-} codeLine;
+    char type[MAX_INPUT];
+    char label[MAX_INPUT];
+    int address;
+    symbolLine *next;
+} symbolLine;
 
-typedef struct code_list
+/*Data table structure*/
+typedef struct
 {
-    codeLine* line;
-    struct codeNode* next;
-} codeNode;
+    int address;
+    unsigned int code;
+    dataLine *next;
+} dataLine;
 
-typedef struct{
-    char label[LINE_LEN];
-    int addr;
-} symTableLine;
-
-typedef struct table_list
+/*Output table structure*/
+typedef struct
 {
-    symTableLine* line;
-    struct symNode* next;
-} symNode;
-
-typedef struct{
-    int addr;
-    unsigned int binCode;
+    int address;
+    unsigned int code;
+    outputLine *next;
 } outputLine;
 
-void symTableCreator();
-int parseFile(FILE*, codeNode*, symNode*);
+/*Function definitions*/
+int readLinesFirstRun(FILE*, int, symbolLine*, outputLine*, dataLine*);
+int readLinesSecondRun(FILE*, char*, int);
+int lineCounter(FILE*);
+int isValidOperator(char*);
+int isValidOperand(char*);
+int isValidOperandUse(char*, char*, char*);
+int isValidAddressing(char*);
+int operatorType(char*);
+int checkLabelExistence(char*, symbolLine*);
+int addressingType(char*, char*);
+int isDigit(char);
+int isSpace(char);
+int isLetter(char);
 
 #endif

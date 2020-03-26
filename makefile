@@ -1,13 +1,18 @@
-EXEC_FILE = assembler
-C_FILES = main.c parser.c reader.c
-H_FILES = assembler.h
+assembler: firstPass.o secondPass.o validation.o main.o utilities.o
+	gcc -g -ansi -Wall validation.o firstPass.o secondPass.o main.o utilities.o -lm -pedantic -o tests/assembler
 
-O_FILES = $(C_FILES:.c=.o)
 
-all: $(EXEC_FILE)
-$(EXEC_FILE): $(O_FILES) 
-	gcc -Wall -ansi -pedantic $(O_FILES) -o $(EXEC_FILE) 
-%.o: %.c $(H_FILES)
-	gcc -Wall -ansi -pedantic -c -o $@ $<
-clean:
-	rm -f *.o $(EXEC_FILE)
+validation.o: validation.c assembler.h
+	gcc -c  -g -ansi validation.c -lm -Wall -pedantic -o validation.o 
+
+main.o: main.c assembler.h
+	gcc -c  -g -ansi main.c -lm -Wall -pedantic -o main.o 
+
+firstPass.o: firstPass.c assembler.h
+	gcc -c -g -ansi firstPass.c -lm -Wall -pedantic -o firstPass.o 
+
+secondPass.o: secondPass.c assembler.h
+	gcc -c -g -ansi secondPass.c -lm -Wall -pedantic -o secondPass.o 
+
+utilities.o: utilities.c assembler.h
+	gcc -c -g -ansi utilities.c -lm -Wall -pedantic -o utilities.o 
