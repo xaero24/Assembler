@@ -20,9 +20,15 @@ int isLetter(char x)
 	return (x >= 'a' && x <= 'z') || (x >= 'A' && x <= 'Z');
 }
 
-int isValidData(char* data)
+int isNumber(char* word, int index)
 {
-    /*Checks the format of a data item - must be a decimal number with an optional leading sign*/
+	int i = index;
+	if(word[i]=='+' || word[i]=='-') i++;
+	while(word[i]!='\0')
+	{
+		if(!isDigit(word[i++])) return FALSE;
+	}
+	return TRUE;
 }
 
 int isValidString(char* str, int size)
@@ -59,78 +65,81 @@ int isLegalLabel(char* label)
 
 int isExistingLabel(char* label, symbolLine* head)
 {
-
+	symbolLine *node = head;
+	int exists = FALSE;
+	while(node!=NULL)
+	{
+		if(	strcmp(label, node->label)==0 && 
+			(strcmp(node->type, "data")==0 ||
+			strcmp(node->type, "code")==0) )
+		{
+			exists = TRUE;
+		}
+		node = node->next;
+	}
+	return exists;
 }
 
 int isValidOperator(char* operator)
 {
+	int valid = TRUE;
+	switch(operatorType(operator))
+	{
+		case GROUP_1:
+		case GROUP_2:
+		case GROUP_3:
+			valid = TRUE;
+			break;
+		default:
+			valid = FALSE;
+			break;
+	}
 
-}
-
-int isValidAddressing(char* operand)
-{
-
+	return valid;
 }
 
 int isValidOperand(char* operand)
 {
+	/*Check if it's a register direct addressing*/
+	if(	strlen(operand)==2 &&
+		operand[0]=='r' &&
+		(operand[1]>='0' && operand[1]<='7') )
+	{
+		return TRUE;
+	}
+	/*Check if it's a register indirect (asterisk) addressing*/
+	else if(	strlen(operand)==3 &&
+				operand[0]=='*' &&
+				operand[1]=='r' &&
+				(operand[2]>='0' && operand[2]<='7') )
+	{
+		return TRUE;
+	}
+	/*Check if it's a number*/
+	else if(operand[0]=='#' && isNumber(operand, 1))
+	{
+		return TRUE;
+	}
+	/*Check if it's a label*/
+	else if(isLegalLabel(operand))
+	{
+		return TRUE;
+	}
+	else
+	{
+		return FALSE;
+	}
 	
 }
 
 int isValidOperandUse(char* operator, char* op1, char* op2)
 {
+	int operType = operatorType
 
 }
 
-int operatorType(char* operator)
-{
-	if(	strcmp(operator, "mov") || 
-		strcmp(operator, "cmp") || 
-		strcmp(operator, "add") || 
-		strcmp(operator, "sub") || 
-		strcmp(operator, "lea"))
-	{
-		return GROUP_1;
-	}
-	else if(	strcmp(operator, "clr") || 
-				strcmp(operator, "not") || 
-				strcmp(operator, "inc") || 
-				strcmp(operator, "dec") || 
-				strcmp(operator, "jmp") || 
-				strcmp(operator, "bne") || 
-				strcmp(operator, "red") || 
-				strcmp(operator, "prn") || 
-				strcmp(operator, "jsr"))
-	{
-		return GROUP_2;
-	}
-	else if(	strcmp(operator, "rts") || 
-				strcmp(operator, "stop"))
-	{
-		return GROUP_3;
-	}
-	
-}
-
-int operandType(char* operand)
-{
-
-}
 
 int checkLabelExistence(char* label, symbolLine* head)
 {
 
-}
-
-int addressingType(char* op1, char* op2)
-{
-	int typeOfOperand1;
-	int typeOfOperand2;
-	int operandTypes;
-
-	typeOfOperand1 = operandType(op1);
-	typeOfOperand2 = operandType(op2);
-	operandTypes = 10*typeOfOperand1 + typeOfOperand2;
-
-	return operandTypes;
 }

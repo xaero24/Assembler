@@ -14,13 +14,16 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
     int IC = 100, DC = 0, x = 0, i = 0, j = 0;
     int labelFlag, contFlag, operandPlace, operatorGroup;
     int lineCount;
-    int pass = TRUE;
+    int pass = TRUE, parsed;
+    char instructionCodes[3][MAX_INPUT], place;
     char s;
+    char are[] = "000";
     char temp[MAX_INPUT], word[MAX_INPUT], currLabel[MAX_INPUT];
     char op1[MAX_INPUT], op2[MAX_INPUT], opTrap[MAX_INPUT];
-    symbolLine* symNode = symLine;
-    outputLine* outNode = outLine;
-    dataLine* dNode = outLine;
+    char code[16];
+    symbolLine* symNode;
+    outputLine* outNode;
+    dataLine* dNode;
 
     /*Set file pointer to start of file*/
     fseek(file, SEEK_SET, 0);
@@ -30,6 +33,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
     {
         labelFlag = FALSE;
         contFlag = FALSE;
+        parsed = FALSE;
         s = fgetc(file);
 
         /*Skip all whitespaces in the beginning of the line and check if line is empty*/
@@ -84,13 +88,13 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                 {
                     /*We found a label.*/
                     /*Check if it's a legal label*/
-                    if(!isLegalLabel(word))
+                    if(isLegalLabel(word)==FALSE)
                     {
                         pass = FALSE;
-                        printf("Line %d: Illegal label\n", i);
+                        printf("Line %d: Illegal label format\n", i);
                     }
                     /*Check if it exists already*/
-                    if(!isExistingLabel(word, symLine))
+                    if(isExistingLabel(word, symLine)==TRUE)
                     {
                         pass = FALSE;
                         printf("Line %d: Duplicate label\n", i);
@@ -104,7 +108,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
 
                 if (word[0]=='.')
                 {
-                    /*The current word is an instruction.
+                    /*The current word is a .something instruction.
                     We determine the type of the instruction and put it into the correct place.*/
                     
                     /*Check if data*/
@@ -114,7 +118,15 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                         /*Add label, if exists, to symtable with current DC value.*/
                         if(labelFlag)
                         {
-                            symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                            if(symNode==NULL)
+                            {
+                                symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = symLine;
+                            }
+                            else
+                            {
+                                symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                            }
                             strcpy(symNode->label, currLabel);
                             strcpy(symNode->type, "data");
                             symNode->address = DC;
@@ -136,14 +148,24 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                                 s = fgetc(file);
                             }
                             temp[x] = '\0';
-                            if(!isValidData(temp))
+                            if(!isNumber(temp, 0))
                             {
                                 pass = FALSE;
                                 printf("Line %d: Invalid data item\n", i);
                             }
-                            dNode = (dataLine*)malloc(sizeof(dataLine));
+
+                            if(dLine==NULL)
+                            {
+                                dLine = (dataLine*)malloc(sizeof(dataLine));
+                                dNode = dLine;
+                            }
+                            else
+                            {
+                                dNode = (dataLine*)malloc(sizeof(dataLine));
+                            }
+                            dataEncoder(temp, code);
                             dNode->address = DC++;
-                            dNode->code = dataEncoder(temp);
+                            strcpy(dNode->code, code);
                             dNode->next = NULL;
                             dNode = dNode->next;
                         }
@@ -158,7 +180,15 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                         /*Add label, if exists, to symtable with current DC value.*/
                         if(labelFlag)
                         {
-                            symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                            if(symLine==NULL)
+                            {
+                                symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = symLine;
+                            }
+                            else
+                            {
+                                symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                            }
                             strcpy(symNode->label, currLabel);
                             strcpy(symNode->type, "data");
                             symNode->address = DC;
@@ -187,9 +217,18 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             x = 1;
                             while(temp[x]!='\"')
                             {
-                                dNode = (dataLine*)malloc(sizeof(dataLine));
+                                if(dLine==NULL)
+                                {
+                                    dLine = (dataLine*)malloc(sizeof(dataLine));
+                                    dNode = dLine;
+                                }
+                                else
+                                {
+                                    dNode = (dataLine*)malloc(sizeof(dataLine));
+                                }
+                                charEncoder(temp[x], code);
                                 dNode->address = DC++;
-                                dNode->code = charEncoder(temp[x]);
+                                strcpy(dNode->code, code);
                                 dNode->next = NULL;
                                 dNode = dNode->next;
                             }
@@ -229,8 +268,16 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                                 s = fgetc(file);
                             }
                             temp[x] = '\0';
-
-                            symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                            
+                            if(symLine==NULL)
+                            {
+                                symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = symLine;
+                            }
+                            else
+                            {
+                                symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                            }
                             strcpy(symNode->label, temp);
                             strcpy(symNode->type, "external");
                             symNode->next = NULL;
@@ -256,14 +303,29 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     /*Add label, if exists, to symtable with current IC value*/
                     if(labelFlag)
                     {
-                        symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                        if(symLine==NULL)
+                        {
+                            symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                            symNode = symLine;
+                        }
+                        else
+                        {
+                            symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                        }
                         strcpy(symNode->label, currLabel);
-                        strcpy(symNode->type, "data");
+                        strcpy(symNode->type, "code");
                         symNode->address = IC;
                         symNode->next = NULL;
                         symNode = symNode->next;
                     }
-                    /**/
+                    if(isValidOperator(word)==FALSE)
+                    {
+                        pass = FALSE;
+                        printf("Line %d: Incorrect operator was used, line skipped\n", i);
+                        while(s!='\n') s = fgetc(file);
+                        i++;
+                        break;
+                    }
                     operatorGroup = operatorType(word);
                     operandPlace = OPERAND1;
                     /*Set no-values to both operands before parsing them*/
@@ -321,12 +383,99 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             printf("Line %d: Too many operands provided\n", i);
                         }
                     }
+
+                    /*In a single-operand instruction we put the operand as the destination operand*/
+                    if(operatorGroup==GROUP_2 && !strcmp(op2, NO_VALUE))
+                    {
+                        strcpy(op2, op1);
+                        strcpy(op1, NO_VALUE);
+                    }
+
+                    /*Validate correct use of operand addressing in the instruction*/
                     if(isValidOperandUse(word, op1, op2))
                     {
                         pass = FALSE;
                         printf("Line %d: Incorrect addressing method was used\n", i);
                     }
+
+                    /*Generate the operator instruction code*/
+                    generateInstructionCode(word, op1, op2, temp);
+                    strcpy(instructionCodes[0], temp);
+
+                    /*For each operand determine its type and what addressing should be used*/
+                    if(operandType(op1)==NUMBER)
+                    {
+                        strcpy(are, "100");
+                        generateOperandCode(op1, OPERAND1, are, temp);
+                        strcpy(instructionCodes[1], temp);
+                    }
+                    else if(operandType(op1)==LABEL)
+                    {
+                        if(isExistingLabel(op1, symLine)) strcpy(are, "010");
+                        else strcpy(are, "001");
+
+                        generateOperandCode(op1, OPERAND1, are, temp);
+                        strcpy(instructionCodes[1], temp);
+                    }
+                    else if(operandType(op1)==DIR_REGISTER || operandType(op1)==INDIR_REGISTER)
+                    {
+                        if(operandType(op2)==DIR_REGISTER || operandType(op2)==INDIR_REGISTER)
+                        {
+                            generateOpcodeDualRegs(op1, op2, temp);
+                            parsed = TRUE;
+                        }
+                        else
+                        {
+                            strcpy(are, "100");
+
+                            generateOperandCode(op1, OPERAND1, are, temp);
+                            strcpy(instructionCodes[1], temp);
+                        }
+                    }
+
+                    if(operandType(op2)==NUMBER)
+                    {
+                        strcpy(are, "100");
+                        generateOperandCode(op2, OPERAND1, are, temp);
+                        strcpy(instructionCodes[2], temp);
+                    }
+                    else if(operandType(op2)==LABEL)
+                    {
+                        if(isExistingLabel(op2, symLine)) strcpy(are, "010");
+                        else strcpy(are, "001");
+
+                        generateOperandCode(op2, OPERAND1, are, temp);
+                        strcpy(instructionCodes[2], temp);
+                    }
+                    else if(operandType(op2)==DIR_REGISTER || operandType(op2)==INDIR_REGISTER)
+                    {
+                        if(parsed==FALSE)
+                        {
+                            strcpy(are, "100");
+
+                            generateOperandCode(op2, OPERAND1, are, temp);
+                            strcpy(instructionCodes[2], temp);
+                        }
+                    }
                     
+                    /*Populate the code table with the instruction's octal values*/
+                    for(place = 0; place<2; place++)
+                    {
+                        if(place==1 && parsed==TRUE) break;
+                        if(outLine==NULL)
+                        {
+                            outLine = (outputLine*)malloc(sizeof(outputLine));
+                            outNode = outLine;
+                        }
+                        else
+                        {
+                            outNode = (outputLine*)malloc(sizeof(outputLine));
+                        }
+                        outNode->address = IC++;
+                        outNode->code = binToOct(instructionCodes[place]);
+                        outNode->next = NULL;
+                        outNode = outNode->next;
+                    }
                 }
             }
         }

@@ -3,27 +3,18 @@
 #ifndef ASSEMBLER_H_
 #define ASSEMBLER_H_
 
-/*Defining the operands in use*/
+/*Defining the parts of instruction in use*/
+#define OPERATOR 0
 #define OPERAND1 1
 #define OPERAND2 2
 #define OPERAND_3_AND_UP 3
 
-/*Definition of various checks*/
-#define NO_VALUE "0-NIL"
-
-/*Definitions of max length for the code parts*/
-#define MAX_INPUT 31
-#define MAX_OPERATOR 5
-#define MAX_STRING 81
-#define MAX_LINE_LENGTH 256
-
-/*Defining operator types*/
+/*Defining the operands in use*/
 #define MOV 0
 #define CMP 1
 #define ADD 2
 #define SUB 3
 #define LEA 4
-
 #define CLR 5
 #define NOT 6
 #define INC 7
@@ -33,9 +24,30 @@
 #define RED 11
 #define PRN 12
 #define JSR 13
-
 #define RTS 14
 #define STOP 15
+
+/*Definition of various checks*/
+#define NO_VALUE "0-NIL"
+
+/*Definitions of max length for the code parts*/
+#define MAX_INPUT 31
+#define MAX_OPERATOR 5
+#define MAX_STRING 81
+#define MAX_LINE_LENGTH 81
+#define BIN_NUM 16
+
+/*Defining addressing methods*/
+#define IMMEDIATE 0
+#define DIRECT 1
+#define REG_INDIRECT 2
+#define REG_DIRECT 3
+
+/*Defining operand types*/
+#define NUMBER 0
+#define LABEL 1
+#define DIR_REGISTER 2
+#define INDIR_REGISTER 3
 
 /*Defining operator groups*/
 #define GROUP_1 1
