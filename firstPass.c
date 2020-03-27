@@ -9,12 +9,13 @@
 TODO: Add correct handling of empty head elements of linked lists in EACH section where it may be relevant.
 */
 
-int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine)
+int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine, int* outerIC, int* outerDC)
 {
     int IC = 100, DC = 0, x = 0, i = 0, j = 0;
     int labelFlag, contFlag, operandPlace, operatorGroup;
-    int lineCount;
+    int lineCount, lblAddr = 0;
     int pass = TRUE, parsed;
+    int firstQuote, lastQuote;
     char instructionCodes[3][MAX_INPUT], place;
     char s;
     char are[] = "000";
@@ -212,10 +213,23 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             if(!isValidString(temp))
                             {
                                 pass = FALSE;
-                                printf("Line %d: Invalid or multiple string definition\n", i);
+                                printf("Line %d: Invalid string definition or extra data after string\n", i);
                             }
-                            x = 1;
-                            while(temp[x]!='\"')
+                            /*Finding the first last quote sign location*/
+                            x = 0;
+                            while(temp[x]!="\0")
+                            {
+                                if(temp[x]=="\"")
+                                {
+                                    firstQuote = x++;
+                                    break;
+                                }
+	                        }
+                            while(temp[x]!="\0")
+                            {
+                                if(temp[x]=="\"") lastQuote = x++;
+	                        }
+                            for(x = firstQuote+1; x<lastQuote; x++)
                             {
                                 if(dLine==NULL)
                                 {
@@ -385,7 +399,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     }
 
                     /*In a single-operand instruction we put the operand as the destination operand*/
-                    if(operatorGroup==GROUP_2 && !strcmp(op2, NO_VALUE))
+                    if(operatorGroup==GROUP_2 && strcmp(op2, NO_VALUE)==0)
                     {
                         strcpy(op2, op1);
                         strcpy(op1, NO_VALUE);
@@ -399,53 +413,46 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     }
 
                     /*Generate the operator instruction code*/
-                    generateInstructionCode(word, op1, op2, temp);
-                    strcpy(instructionCodes[0], temp);
+                    generateInstructionCode(word, op1, op2, code);
+                    strcpy(instructionCodes[0], code);
 
                     /*For each operand determine its type and what addressing should be used*/
                     if(operandType(op1)==NUMBER)
                     {
                         strcpy(are, "100");
-                        generateOperandCode(op1, OPERAND1, are, temp);
-                        strcpy(instructionCodes[1], temp);
+                        generateOperandCode(op1, OPERAND1, are, code, lblAddr);
+                        strcpy(instructionCodes[1], code);
                     }
                     else if(operandType(op1)==LABEL)
                     {
-                        if(isExistingLabel(op1, symLine)) strcpy(are, "010");
-                        else strcpy(are, "001");
-
-                        generateOperandCode(op1, OPERAND1, are, temp);
-                        strcpy(instructionCodes[1], temp);
+                        strcpy(instructionCodes[1], NO_VALUE);
                     }
                     else if(operandType(op1)==DIR_REGISTER || operandType(op1)==INDIR_REGISTER)
                     {
                         if(operandType(op2)==DIR_REGISTER || operandType(op2)==INDIR_REGISTER)
                         {
-                            generateOpcodeDualRegs(op1, op2, temp);
+                            generateOpcodeDualRegs(op1, op2, code);
+                            strcpy(instructionCodes[1], code);
                             parsed = TRUE;
                         }
                         else
                         {
                             strcpy(are, "100");
 
-                            generateOperandCode(op1, OPERAND1, are, temp);
-                            strcpy(instructionCodes[1], temp);
+                            generateOperandCode(op1, OPERAND1, are, code, lblAddr);
+                            strcpy(instructionCodes[1], code);
                         }
                     }
 
                     if(operandType(op2)==NUMBER)
                     {
                         strcpy(are, "100");
-                        generateOperandCode(op2, OPERAND1, are, temp);
-                        strcpy(instructionCodes[2], temp);
+                        generateOperandCode(op2, OPERAND1, are, code, lblAddr);
+                        strcpy(instructionCodes[2], code);
                     }
                     else if(operandType(op2)==LABEL)
                     {
-                        if(isExistingLabel(op2, symLine)) strcpy(are, "010");
-                        else strcpy(are, "001");
-
-                        generateOperandCode(op2, OPERAND1, are, temp);
-                        strcpy(instructionCodes[2], temp);
+                        strcpy(instructionCodes[1], NO_VALUE);
                     }
                     else if(operandType(op2)==DIR_REGISTER || operandType(op2)==INDIR_REGISTER)
                     {
@@ -453,15 +460,15 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                         {
                             strcpy(are, "100");
 
-                            generateOperandCode(op2, OPERAND1, are, temp);
-                            strcpy(instructionCodes[2], temp);
+                            generateOperandCode(op2, OPERAND1, are, code, lblAddr);
+                            strcpy(instructionCodes[2], code);
                         }
                     }
                     
                     /*Populate the code table with the instruction's octal values*/
                     for(place = 0; place<2; place++)
                     {
-                        if(place==1 && parsed==TRUE) break;
+                        if(place==2 && parsed==TRUE) break;
                         if(outLine==NULL)
                         {
                             outLine = (outputLine*)malloc(sizeof(outputLine));
@@ -472,7 +479,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             outNode = (outputLine*)malloc(sizeof(outputLine));
                         }
                         outNode->address = IC++;
-                        outNode->code = binToOct(instructionCodes[place]);
+                        strcpy(outNode->code, instructionCodes[place]);
                         outNode->next = NULL;
                         outNode = outNode->next;
                     }
@@ -481,6 +488,18 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
         }
         i++;
     }
-
+    
+    /*Update all DC values to correct IC values*/
+    symNode = symLine;
+    while(symNode)
+    {
+        if(strcmp(symNode->type, "data")==0)
+        {
+            symNode->address = symNode->address + IC;
+        }
+        symNode = symNode->next;
+    }
+    *outerIC = IC-100;
+    *outerDC = DC;
     return pass;
 }

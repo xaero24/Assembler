@@ -52,6 +52,7 @@ int stringToUnsignedInt(char* string)
 
 void decToBin(int decimal, char* res)
 {
+    /*TODO: Might cause a problem with result and flipped arrays*/
     char result[12];
     char flipped[12];
     int i = 0, size;
@@ -74,6 +75,39 @@ void decToBin(int decimal, char* res)
     strcpy(res, result);
 }
 
+void binToOct(char* binary, char* result)
+{
+    char data[3], digit;
+    char res[6];
+    int i = 0, x = 0, index = 0;
+    strcpy(result, "");
+    while(binary[i]!='\0')
+    {
+        data[x++] = binary[i++];
+        if(x==3)
+        {
+            data[x] = '\0';
+            x = 0;
+            digit = getDigitFromBinary(data);
+            res[index++] = digit;
+        }
+    }
+    res[index] = '\0';
+    strcpy(result, res);
+}
+
+char getDigitFromBinary(char* binary)
+{
+    if(strcmp(binary, "000")==0) return '0';
+    if(strcmp(binary, "001")==0) return '1';
+    if(strcmp(binary, "010")==0) return '2';
+    if(strcmp(binary, "011")==0) return '3';
+    if(strcmp(binary, "100")==0) return '4';
+    if(strcmp(binary, "101")==0) return '5';
+    if(strcmp(binary, "110")==0) return '6';
+    if(strcmp(binary, "111")==0) return '7';
+}
+
 int decToUnsignedDec(int number)
 {
     /*Returns the unsigned decimal value of a given number*/
@@ -87,6 +121,7 @@ void dataEncoder(char* data, char* result)
     int number = stringToUnsignedInt(data), length, i;
     char temp[16];
     decToBin(number, temp);
+    strcpy(result, "");
     length = strlen(temp);
     for(i=0; i<(16-length); i++)
     {
@@ -101,6 +136,7 @@ void charEncoder(char c, char* result)
     int ascii_char = c, length, i;
     char temp[16];
     decToBin(ascii_char, temp);
+    strcpy(result, "");
     length = strlen(temp);
     for(i=0; i<(16-length); i++)
     {
@@ -176,6 +212,7 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
     }
     else
     {
+        strcpy(result, "");
         switch(operandType(operand))
         {
             case NUMBER:
@@ -191,19 +228,23 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
             case LABEL:
                 /*Get the binary code of the label's address*/
                 decToBin(lblAddr, binOper);
+                length = strlen(binOper);
+                for(i = 0; i<(12-length); i++)
+                {
+                    strcat(result, "0");
+                }
                 strcat(result, binOper);
                 break;
             case DIR_REGISTER:
                 decToBin(operand[1], binOper);
+                strcat(result, header);
                 if(operandPlace==OPERAND1)
                 {
-                    strcat(result, header);
                     strcat(result, binOper);
                     strcat(result, "000");
                 }
                 else if(operandPlace==OPERAND2)
                 {
-                    strcat(result, header);
                     strcat(result, "000");
                     strcat(result, binOper);
                 }
@@ -211,15 +252,14 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
                 break;
             case INDIR_REGISTER:
                 decToBin(operand[2], binOper);
+                strcat(result, header);
                 if(operandPlace==OPERAND1)
                 {
-                    strcat(result, header);
                     strcat(result, binOper);
                     strcat(result, "000");
                 }
                 else if(operandPlace==OPERAND2)
                 {
-                    strcat(result, header);
                     strcat(result, "000");
                     strcat(result, binOper);
                 }

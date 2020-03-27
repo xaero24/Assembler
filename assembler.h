@@ -46,8 +46,8 @@
 /*Defining operand types*/
 #define NUMBER 0
 #define LABEL 1
-#define DIR_REGISTER 2
-#define INDIR_REGISTER 3
+#define INDIR_REGISTER 2
+#define DIR_REGISTER 3
 
 /*Defining operator groups*/
 #define GROUP_1 1
@@ -71,7 +71,7 @@ typedef struct
 typedef struct
 {
     int address;
-    unsigned int code;
+    char code[MAX_INPUT];
     dataLine *next;
 } dataLine;
 
@@ -79,23 +79,38 @@ typedef struct
 typedef struct
 {
     int address;
-    unsigned int code;
+    char code[MAX_INPUT];
     outputLine *next;
 } outputLine;
 
 /*Function definitions*/
-int readLinesFirstRun(FILE*, int, symbolLine*, outputLine*, dataLine*);
-int readLinesSecondRun(FILE*, char*, int);
-int lineCounter(FILE*);
-int isValidOperator(char*);
-int isValidOperand(char*);
-int isValidOperandUse(char*, char*, char*);
-int isValidAddressing(char*);
-int operatorType(char*);
-int checkLabelExistence(char*, symbolLine*);
-int addressingType(char*, char*);
-int isDigit(char);
-int isSpace(char);
-int isLetter(char);
+int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine, int*, int*);
+int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine);
+
+int lineCounter(FILE *file);
+int stringToUnsignedInt(char* string);
+void decToBin(int decimal, char* res);
+void binToOct(char* binary, char* result);
+int decToUnsignedDec(int number);
+void dataEncoder(char* data, char* result);
+void charEncoder(char c, char* result);
+void generateInstructionCode(char* operator, char* src, char* dest, char* result);
+void generateOperandCode(char* operand, int operandPlace, char* are, char* result, int lblAddr);
+void generateOpcodeDualRegs(char* reg1, char* reg2, char* result);
+int operatorType(char* operator);
+void getOperatorBinary(char* operator, char* result);
+int getOperatorNumber(char* operator);
+int operandType(char* operand);
+
+int isDigit(char x);
+int isSpace(char x);
+int isLetter(char x);
+int isNumber(char* word, int index);
+int isValidString(char* str);
+int isLegalLabel(char* label);
+int isExistingLabel(char* label, symbolLine* head);
+int isValidOperator(char* operator);
+int isValidOperand(char* operand);
+int isValidOperandUse(char* operator, char* op1, char* op2);
 
 #endif

@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
     char *parsedFile;
     int pass_1 = FALSE, pass_2 = FALSE, passNumber = 1;
     int i, lineCount;
+    int IC, DC;
     FILE *file;
 
     symbolLine *symLine = NULL; /*TODO: Destroy after finishing*/
@@ -45,13 +46,15 @@ int main(int argc, char* argv[])
         lineCount = lineCounter(file);
 
         /*Collect the input from the file*/
-        pass_1 = readLinesFirstRun(file, lineCount, symLine, outLine, dLine);
+        pass_1 = readLinesFirstRun(file, lineCount, symLine, outLine, dLine, &IC, &DC);
         if(pass_1){
-            pass_2 = readLinesSecondRun(file, parsedFile, lineCount);
+            pass_2 = readLinesSecondRun(file, lineCount, symLine, outLine, dLine);
         }
+        else printf("File %s failed on first pass\n", parsedFile);
 
         if(pass_2)
-        {
+        {  
+            /*Create files from the output*/
             printf("Successfully processed %s.as\n", parsedFile);
         }
         else
@@ -61,5 +64,6 @@ int main(int argc, char* argv[])
         fclose(file);
     }
 
+    /*Free all the structures that use dynamic memory*/
     return 0;
 }
