@@ -5,7 +5,7 @@
 #include <string.h>
 #include "assembler.h"
 
-int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine)
+int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, dataLine* dLine)
 {
     int x = 0, i = 0, j = 0;
     int labelFlag, contFlag;
@@ -19,7 +19,7 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
     dataLine* dNode;
 
     /*Set file pointer to start of file*/
-    fseek(file, SEEK_SET, 0);
+    fseek(file, 0, SEEK_SET);
 
     /*Read a line from the file*/
     while(i<lineCount)
@@ -28,12 +28,16 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
         s = fgetc(file);
 
         /*Skip all whitespaces in the beginning of the line and check if line is empty*/
+        if(s=='\n' || s==EOF)
+        {
+            i++;
+            continue;
+        }
         while(isSpace(s))
         {
             s = fgetc(file);
-            if (s=='\n'){
+            if (s=='\n' || s==EOF){
                 contFlag = TRUE;
-                printf("Line %d: Empty line\n", i);
                 break;
             }
         }
@@ -46,12 +50,11 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
         /*A commented line is not parsed and thus ignored*/
         if (s==';')
         {
-            while (s!='\n')
+            while (s!='\n' && s!=EOF)
             {
                 s = fgetc(file);
             }
             i++;
-            printf("Line %d: Comment line\n", i);
             continue;
         }
 
@@ -86,13 +89,30 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
                     /*The current word is a .something instruction.
                     handle only .entry in the second run.*/
 
-                    /*Check if entry*/
-                    if (strcmp(".entry", temp)==0)
+                    if (strcmp(".extern", word)==0||
+                        strcmp(".data", word)==0 ||
+                        strcmp(".string", word)==0 )
                     {
-                        while(s!='\n'){
+                        /*Not handled in the second run*/
+                        while (s!='\n' && s!=EOF)
+                        {
+                            s = fgetc(file);
+                        }
+                        break;
+                    }
+
+                    /*Check if entry*/
+                    if (strcmp(".entry", word)==0)
+                    {
+                        while(s!='\n' && s!=EOF){
+                            /*Ignore all whitespaces and commas*/
+                            while(isSpace(s) || s==',')
+                            {
+                                s = fgetc(file);
+                            }
                             /*Parse app the labels of the .entry command*/
                             x = 0;
-                            while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && j<MAX_INPUT)
+                            while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && x<MAX_INPUT)
                             {
                                 temp[x++] = s;
                                 s = fgetc(file);
@@ -112,7 +132,7 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
                             }
                             if(labelFlag==FALSE){
                                 pass = FALSE;
-                                printf("Line %d: Label doesn't exist\n", i);
+                                printf("Line %d: Label \"%s\" doesn't exist in symbol table\n", i+1, temp);
                             }
                         }
                         /*If yes - add to each label the "entry" parameter as the type*/
@@ -123,7 +143,7 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
                 else
                 {
                     /*This is an operator.*/
-                    while(s!='\n'){
+                    while(s!='\n' && s!=EOF){
                         /*Ignore all whitespaces and commas*/
                         while(isSpace(s) || s==',')
                         {
@@ -165,7 +185,7 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
                             }
                             if(labelFlag==FALSE){
                                 pass = FALSE;
-                                printf("Line %d: Label doesn't exist\n", i);
+                                printf("Line %d: Code Error: Label \"%s\" doesn't exist in symbol table\n", i+1, temp);
                             }
 
                             if(isExistingLabel(temp, symLine)) strcpy(are, "010");
@@ -181,7 +201,7 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
                                 {
                                     strcpy(dNode->code, code);
                                 }
-                                symNode = symNode->next;
+                                dNode = dNode->next;
                             }
                         }
                     }

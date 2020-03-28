@@ -9,9 +9,9 @@
 TODO: Add correct handling of empty head elements of linked lists in EACH section where it may be relevant.
 */
 
-int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine, int* outerIC, int* outerDC)
+int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLine** outLine, dataLine** dLine, int* outerIC, int* outerDC)
 {
-    int IC = 100, DC = 0, x = 0, i = 1, j = 0;
+    int IC = 100, DC = 0, x = 0, i = 0, j = 0;
     int labelFlag, contFlag, operandPlace, operatorGroup;
     int lblAddr = 0;
     int pass = TRUE, parsed, place;
@@ -27,7 +27,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
     dataLine* dNode;
 
     /*Set file pointer to start of file*/
-    fseek(file, SEEK_SET, 0);
+    fseek(file, 0, SEEK_SET);
 
     /*Read a line from the file*/
     while(i<lineCount)
@@ -35,15 +35,22 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
         labelFlag = FALSE;
         contFlag = FALSE;
         parsed = FALSE;
+
         s = fgetc(file);
 
         /*Skip all whitespaces in the beginning of the line and check if line is empty*/
+        if(s=='\n' || s==EOF)
+        {
+            printf("Line %d: Empty line\n", i+1);
+            i++;
+            continue;
+        }
         while(isSpace(s))
         {
             s = fgetc(file);
-            if (s=='\n'){
+            if (s=='\n' || s==EOF){
                 contFlag = TRUE;
-                printf("Line %d: Empty line\n", i);
+                printf("Line %d: Empty line\n", i+1);
                 break;
             }
         }
@@ -56,12 +63,12 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
         /*A commented line is not parsed and thus ignored*/
         if (s==';')
         {
-            while (s!='\n')
+            while (s!='\n' && s!=EOF)
             {
                 s = fgetc(file);
             }
+            printf("Line %d: Comment line\n", i+1);
             i++;
-            printf("Line %d: Comment line\n", i);
             continue;
         }
 
@@ -89,16 +96,17 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                 {
                     /*We found a label.*/
                     /*Check if it's a legal label*/
+                    word[j-1] = '\0';
                     if(isLegalLabel(word)==FALSE)
                     {
                         pass = FALSE;
-                        printf("Line %d: Illegal label format\n", i);
+                        printf("Line %d: Illegal label format for label \"%s\"\n", i+1, word);
                     }
                     /*Check if it exists already*/
-                    if(isExistingLabel(word, symLine)==TRUE)
+                    if(isExistingLabel(word, *symLine)==TRUE)
                     {
                         pass = FALSE;
-                        printf("Line %d: Duplicate label\n", i);
+                        printf("Line %d: Duplicate label \"%s\"\n", i+1, word);
                     }
                     /*We store it and continue reading.*/
                     labelFlag = TRUE;
@@ -113,28 +121,28 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     We determine the type of the instruction and put it into the correct place.*/
                     
                     /*Check if data*/
-                    if (strcmp(".data", temp)==0)
+                    if (strcmp(".data", word)==0)
                     {
                         /*Data instruction found.*/
                         /*Add label, if exists, to symtable with current DC value.*/
                         if(labelFlag)
                         {
-                            if(symNode==NULL)
+                            if(*symLine==NULL)
                             {
-                                symLine = (symbolLine*)malloc(sizeof(symbolLine));
-                                symNode = symLine;
+                                *symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = *symLine;
                             }
                             else
                             {
-                                symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode->next = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = symNode->next;
                             }
                             strcpy(symNode->label, currLabel);
                             strcpy(symNode->type, "data");
                             symNode->address = DC;
                             symNode->next = NULL;
-                            symNode = symNode->next;
                         }
-                        while(s!='\n')
+                        while(s!='\n' && s!=EOF)
                         {
                             /*Ignore all whitespaces and commas*/
                             while(isSpace(s) || s==',')
@@ -143,7 +151,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             }
                             /*Get the next data item*/
                             x = 0;
-                            while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && j<MAX_INPUT)
+                            while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && x<MAX_INPUT)
                             {
                                 temp[x++] = s;
                                 s = fgetc(file);
@@ -152,59 +160,59 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             if(!isNumber(temp, 0))
                             {
                                 pass = FALSE;
-                                printf("Line %d: Invalid data item\n", i);
+                                printf("Line %d: Invalid data item \"%s\"\n", i+1, temp);
                             }
 
-                            if(dLine==NULL)
+                            if(*dLine==NULL)
                             {
-                                dLine = (dataLine*)malloc(sizeof(dataLine));
-                                dNode = dLine;
+                                *dLine = (dataLine*)malloc(sizeof(dataLine));
+                                dNode = *dLine;
                             }
                             else
                             {
-                                dNode = (dataLine*)malloc(sizeof(dataLine));
+                                dNode->next = (dataLine*)malloc(sizeof(dataLine));
+                                dNode = dNode->next;
                             }
                             dataEncoder(temp, code);
                             dNode->address = DC++;
                             strcpy(dNode->code, code);
                             dNode->next = NULL;
-                            dNode = dNode->next;
                         }
                         /*Read next line.*/
                         continue;
                     }
 
                     /*Check if string*/
-                    if (strcmp(".string", temp)==0)
+                    if (strcmp(".string", word)==0)
                     {
                         /*String instruction found.*/
                         /*Add label, if exists, to symtable with current DC value.*/
                         if(labelFlag)
                         {
-                            if(symLine==NULL)
+                            if(*symLine==NULL)
                             {
-                                symLine = (symbolLine*)malloc(sizeof(symbolLine));
-                                symNode = symLine;
+                                *symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = *symLine;
                             }
                             else
                             {
-                                symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode->next = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = symNode->next;
                             }
                             strcpy(symNode->label, currLabel);
                             strcpy(symNode->type, "data");
                             symNode->address = DC;
                             symNode->next = NULL;
-                            symNode = symNode->next;
                         }
-                        while(s!='\n'){
+                        while(s!='\n' && s!=EOF){
                             /*Ignore all whitespaces and commas*/
-                            while(isSpace(s) || s==',')
+                            while(isSpace(s))
                             {
                                 s = fgetc(file);
                             }
                             /*Get the next data item*/
                             x = 0;
-                            while(s!='\n' && s!=EOF && j<MAX_STRING)
+                            while(s!='\n' && s!=EOF && x<MAX_STRING)
                             {
                                 temp[x++] = s;
                                 s = fgetc(file);
@@ -213,7 +221,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             if(!isValidString(temp))
                             {
                                 pass = FALSE;
-                                printf("Line %d: Invalid string definition or extra data after string\n", i);
+                                printf("Line %d: Invalid string definition or extra data after string in \'%s\'\n", i+1, temp);
                             }
                             /*Finding the first last quote sign location*/
                             x = 0;
@@ -227,48 +235,63 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
 	                        }
                             while(temp[x]!='\0')
                             {
-                                if(temp[x]=='\"') lastQuote = x++;
+                                if(temp[x]=='\"') lastQuote = x;
+                                x++;
 	                        }
                             for(x = firstQuote+1; x<lastQuote; x++)
                             {
-                                if(dLine==NULL)
+                                if(*dLine==NULL)
                                 {
-                                    dLine = (dataLine*)malloc(sizeof(dataLine));
-                                    dNode = dLine;
+                                    *dLine = (dataLine*)malloc(sizeof(dataLine));
+                                    dNode = *dLine;
                                 }
                                 else
                                 {
-                                    dNode = (dataLine*)malloc(sizeof(dataLine));
+                                    dNode->next = (dataLine*)malloc(sizeof(dataLine));
+                                    dNode = dNode->next;
                                 }
                                 charEncoder(temp[x], code);
                                 dNode->address = DC++;
                                 strcpy(dNode->code, code);
                                 dNode->next = NULL;
+                            }
+                            /*Add \0 to end*/
+                            if(*dLine==NULL)
+                            {
+                                *dLine = (dataLine*)malloc(sizeof(dataLine));
+                                dNode = *dLine;
+                            }
+                            else
+                            {
+                                dNode->next = (dataLine*)malloc(sizeof(dataLine));
                                 dNode = dNode->next;
                             }
+                            charEncoder('\0', code);
+                            dNode->address = DC++;
+                            strcpy(dNode->code, code);
+                            dNode->next = NULL;
                         }
                         /*Read next line.*/
                         continue;
                     }
 
                     /*Check if entry*/
-                    if (strcmp(".entry", temp)==0)
+                    if (strcmp(".entry", word)==0)
                     {
                         /*Not handled in the first run*/
-                        while (s!='\n')
+                        while (s!='\n' && s!=EOF)
                         {
                             s = fgetc(file);
                         }
-                        i++;
-                        continue;
+                        break;
                     }
 
                     /*Check if extern*/
-                    else if (strcmp(".extern", temp)==0)
+                    else if (strcmp(".extern", word)==0)
                     {
                         /*Extern instriction found.*/
                         /*Put each label in the symtable with the external tag.*/
-                        while(s!='\n'){
+                        while(s!='\n' && s!=EOF){
                             /*Ignore all whitespaces and commas*/
                             while(isSpace(s) || s==',')
                             {
@@ -276,26 +299,26 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             }
                             /*Get the next data item*/
                             x = 0;
-                            while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && j<MAX_INPUT)
+                            while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && x<MAX_INPUT)
                             {
                                 temp[x++] = s;
                                 s = fgetc(file);
                             }
                             temp[x] = '\0';
                             
-                            if(symLine==NULL)
+                            if(*symLine==NULL)
                             {
-                                symLine = (symbolLine*)malloc(sizeof(symbolLine));
-                                symNode = symLine;
+                                *symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = *symLine;
                             }
                             else
                             {
-                                symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode->next = (symbolLine*)malloc(sizeof(symbolLine));
+                                symNode = symNode->next;
                             }
                             strcpy(symNode->label, temp);
                             strcpy(symNode->type, "external");
                             symNode->next = NULL;
-                            symNode = symNode->next;
                         }
                         /*Read next line.*/
                         continue;
@@ -305,7 +328,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     else
                     {
                         pass = FALSE;
-                        printf("Line %d: Bad definition of instruction\n", i);
+                        printf("Line %d: Bad definition of instruction \"%s\"\n", i+1, word);
                         while (s!='\n' && s!=EOF)
                             s = fgetc(file);
                     }
@@ -317,25 +340,25 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     /*Add label, if exists, to symtable with current IC value*/
                     if(labelFlag)
                     {
-                        if(symLine==NULL)
+                        if(*symLine==NULL)
                         {
-                            symLine = (symbolLine*)malloc(sizeof(symbolLine));
-                            symNode = symLine;
+                            *symLine = (symbolLine*)malloc(sizeof(symbolLine));
+                            symNode = *symLine;
                         }
                         else
                         {
-                            symNode = (symbolLine*)malloc(sizeof(symbolLine));
+                            symNode->next = (symbolLine*)malloc(sizeof(symbolLine));
+                            symNode = symNode->next;
                         }
                         strcpy(symNode->label, currLabel);
                         strcpy(symNode->type, "code");
                         symNode->address = IC;
                         symNode->next = NULL;
-                        symNode = symNode->next;
                     }
                     if(isValidOperator(word)==FALSE)
                     {
                         pass = FALSE;
-                        printf("Line %d: Incorrect operator was used, line skipped\n", i);
+                        printf("Line %d: Incorrect operator \"%s\" was used, line skipped\n", i+1, word);
                         while(s!='\n') s = fgetc(file);
                         i++;
                         break;
@@ -347,7 +370,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     strcpy(op2, NO_VALUE);
                     /*We use opTrap to find any excessive operands in the instruction (3 or more)*/
                     strcpy(opTrap, NO_VALUE);
-                    while(s!='\n'){
+                    while(s!='\n' && s!=EOF){
                         /*Ignore all whitespaces and commas*/
                         while(isSpace(s) || s==',')
                         {
@@ -355,7 +378,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                         }
                         /*Get the next operand*/
                         x = 0;
-                        while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && j<MAX_INPUT)
+                        while(s!=' ' && s!=',' && s!='\t' && s!='\n' && s!=EOF && x<MAX_INPUT)
                         {
                             temp[x++] = s;
                             s = fgetc(file);
@@ -365,7 +388,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                         if(!isValidOperand(temp))
                         {
                             pass = FALSE;
-                            printf("Line %d: Incorrect operand was used\n", i);
+                            printf("Line %d: Incorrect operand \"%s\" was used\n", i+1, temp);
                         }
                         if(operandPlace==OPERAND1)
                         {
@@ -373,7 +396,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             {
                                 /*Operators of group 3 have no allowed operands*/
                                 pass = FALSE;
-                                printf("Line %d: Too many operands provided\n", i);
+                                printf("Line %d: Too many operands provided for operator \"%s\"\n", i+1, word);
                             }
                             strcpy(op1, temp);
                             operandPlace = OPERAND2;
@@ -385,7 +408,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             {
                                 /*Operators of group 3 have no allowed operands, and operators of group 2 can have only one operand*/
                                 pass = FALSE;
-                                printf("Line %d: Too many operands provided\n", i);
+                                printf("Line %d: Too many operands provided for operator \"%s\"\n", i+1, word);
                             }
                             strcpy(op2, temp);
                             operandPlace = OPERAND_3_AND_UP;
@@ -394,7 +417,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                         {
                             /*No operator can have more than 2 operands*/
                             pass = FALSE;
-                            printf("Line %d: Too many operands provided\n", i);
+                            printf("Line %d: Too many operands provided for operator \"%s\"\n", i+1, word);
                         }
                     }
 
@@ -406,10 +429,10 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     }
 
                     /*Validate correct use of operand addressing in the instruction*/
-                    if(isValidOperandUse(word, op1, op2))
+                    if(!isValidOperandUse(word, op1, op2))
                     {
                         pass = FALSE;
-                        printf("Line %d: Incorrect addressing method was used\n", i);
+                        printf("Line %d: Incorrect addressing method was used for operator \"%s\"\n", i+1, word);
                     }
 
                     /*Generate the operator instruction code*/
@@ -452,7 +475,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     }
                     else if(operandType(op2)==LABEL)
                     {
-                        strcpy(instructionCodes[1], NO_VALUE);
+                        strcpy(instructionCodes[2], NO_VALUE);
                     }
                     else if(operandType(op2)==DIR_REGISTER || operandType(op2)==INDIR_REGISTER)
                     {
@@ -466,22 +489,24 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                     }
                     
                     /*Populate the code table with the instruction's octal values*/
-                    for(place = 0; place<2; place++)
+                    for(place = 0; place<3; place++)
                     {
                         if(place==2 && parsed==TRUE) break;
-                        if(outLine==NULL)
+                        if(operatorType(word)==GROUP_2 && place==1) continue;
+                        if(operatorType(word)==GROUP_3 && place>0) continue;
+                        if(*outLine==NULL)
                         {
-                            outLine = (outputLine*)malloc(sizeof(outputLine));
-                            outNode = outLine;
+                            *outLine = (outputLine*)malloc(sizeof(outputLine));
+                            outNode = *outLine;
                         }
                         else
                         {
-                            outNode = (outputLine*)malloc(sizeof(outputLine));
+                            outNode->next = (outputLine*)malloc(sizeof(outputLine));
+                            outNode = outNode->next;
                         }
                         outNode->address = IC++;
                         strcpy(outNode->code, instructionCodes[place]);
                         outNode->next = NULL;
-                        outNode = outNode->next;
                     }
                 }
             }
@@ -490,7 +515,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
     }
     
     /*Update all DC values to correct IC values*/
-    symNode = symLine;
+    symNode = *symLine;
     while(symNode)
     {
         if(strcmp(symNode->type, "data")==0)

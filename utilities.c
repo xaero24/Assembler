@@ -12,7 +12,7 @@ int lineCounter(FILE *file)
     char c;
 
     /*Going back to the beginning of the file*/
-    fseek(file,SEEK_SET,0);
+    fseek(file, 0, SEEK_SET);
     /*Check if the file has 1 line at least */
     if (fgetc(file)!= EOF)
         count++;
@@ -392,6 +392,7 @@ void getRegNumBinary(char regNum, char* result)
 
 int operandType(char* operand)
 {
+	/*Check if it's a register direct addressing*/
     if(strlen(operand)==2 && operand[0]=='r' && (operand[1]>='0' && operand[1]<='7'))
 	{
 		return DIR_REGISTER;

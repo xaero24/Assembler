@@ -84,8 +84,8 @@ typedef struct out_line
 } outputLine;
 
 /*Function definitions*/
-int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine, int*, int*);
-int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine);
+int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLine** outLine, dataLine** dLine, int*, int*);
+int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, dataLine* dLine);
 
 int lineCounter(FILE *file);
 int stringToUnsignedInt(char* string);

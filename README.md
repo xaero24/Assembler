@@ -21,7 +21,7 @@ Note that the filenames are of the .as files you want to parse, WITHOUT the .as 
 [X] Update the dynamic allocations to correct allocations
 [X] Parsers - update the utilities functions
 [X] Validation - update validators
-[] File creation
+[X] File creation
 [X] Memory deletion
 [] Update the makefile from tests/assembler to assembler
 [X] Update fully the secondRun.c file based on the firstRun.c file

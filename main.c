@@ -14,6 +14,7 @@ TODO: Remove all todos
 int main(int argc, char* argv[])
 {
     char inputFile[FILENAME_MAX];
+    char ent[MAX_INPUT], ext[MAX_INPUT], ob[MAX_INPUT];
     char *parsedFile;
     int pass_1 = FALSE, pass_2 = FALSE;
     int i, lineCount;
@@ -23,6 +24,7 @@ int main(int argc, char* argv[])
     symbolLine *symLine = NULL; /*TODO: Destroy after finishing*/
     outputLine *outLine = NULL; /*TODO: Destroy after finishing*/
     dataLine *dLine = NULL; /*TODO: Destroy after finishing*/
+
     symbolLine *sNode = NULL; /*TODO: Destroy after finishing*/
     outputLine *oNode = NULL; /*TODO: Destroy after finishing*/
     dataLine *dNode = NULL; /*TODO: Destroy after finishing*/
@@ -34,7 +36,7 @@ int main(int argc, char* argv[])
     }
 
     /*Go through the provided files and process each one*/
-    for(i = 1; i < argc; i++)
+    for(i = 1; i<argc; i++)
     {
         parsedFile = argv[i];
         strcpy(inputFile, argv[i]);
@@ -47,18 +49,27 @@ int main(int argc, char* argv[])
             return 0;
         }
         lineCount = lineCounter(file);
+        printf("    Lines: %d\n", lineCount);
 
         /*Collect the input from the file*/
-        pass_1 = readLinesFirstRun(file, lineCount, symLine, outLine, dLine, &IC, &DC);
+        pass_1 = readLinesFirstRun(file, lineCount, &symLine, &outLine, &dLine, &IC, &DC);
         if(pass_1){
             printf("File %s completed first pass\n", parsedFile);
-            pass_2 = readLinesSecondRun(file, lineCount, symLine, outLine, dLine);
+            printf("IC is: %d, DC is %d\n", IC, DC);
+            pass_2 = readLinesSecondRun(file, lineCount, symLine, dLine);
         }
         else printf("Error: File %s failed on first pass\n", parsedFile);
 
         if(pass_2)
         {  
             /*Create files from the output*/
+            strcpy(ent, argv[i]);
+            strcat(ent, ".ent");
+            strcpy(ext, argv[i]);
+            strcat(ext, ".ex");
+            strcpy(ob, argv[i]);
+            strcat(ob, ".ob");
+            createOutputFiles(ent, ext, ob, symLine, outLine, dLine, IC, DC);
             printf("Successfully processed %s.as\n", parsedFile);
         }
         else
