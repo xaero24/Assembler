@@ -23,6 +23,7 @@ int isLetter(char x)
 int isNumber(char* word, int index)
 {
 	int i = index;
+	if(index==1 && word[0]!='#') return FALSE;
 	if(word[i]=='+' || word[i]=='-') i++;
 	while(word[i]!='\0')
 	{
@@ -35,13 +36,14 @@ int isValidString(char* str)
 {
     /*Checks if the string is a correctly formed single string*/
 	int i = 1;
-	int firstQuote, lastQuote;
+	int lastQuote;
 	/*Finding the last quote sign location*/
-	while(str[i]!="\0")
+	while(str[i]!='\0')
 	{
-		if(str[i]=="\"") lastQuote = i++;
+		if(str[i]=='\"') lastQuote = i;
+		i++;
 	}
-	if(str[0]!="\"") return FALSE;
+	if(str[0]!='\"') return FALSE;
 
 	for(i = lastQuote+1; str[i]!='\0'; i++)
 	{
@@ -53,6 +55,18 @@ int isValidString(char* str)
 int isLegalLabel(char* label)
 {
 	int i = 1;
+	/*Check if name of operator*/
+	if(operatorType(label)!=9) return FALSE;
+	/*check if name of register*/
+	if(	strcmp(label, "r0")==0 ||
+		strcmp(label, "r1")==0 ||
+		strcmp(label, "r2")==0 ||
+		strcmp(label, "r3")==0 ||
+		strcmp(label, "r4")==0 ||
+		strcmp(label, "r5")==0 ||
+		strcmp(label, "r6")==0 ||
+		strcmp(label, "r7")==0) return FALSE;
+
 	if(!isLetter(label[0]))
 	{
 		return FALSE;
@@ -105,6 +119,9 @@ int isValidOperator(char* operator)
 
 int isValidOperand(char* operand)
 {
+	/*Check if it's a no-value unique assignment*/
+	if(strcmp(operand, NO_VALUE)==0) return TRUE;
+
 	/*Check if it's a register direct addressing*/
 	if(	strlen(operand)==2 &&
 		operand[0]=='r' &&
@@ -142,6 +159,7 @@ int isValidOperandUse(char* operator, char* op1, char* op2)
 	int operType = getOperatorNumber(operator);
 	int op1_type = operandType(op1), op2_type = operandType(op2);
 	int ok = TRUE;
+	if(!isValidOperand(op1) || !isValidOperand(op2)) return FALSE;
 	switch(operType)
 	{
 		case MOV:

@@ -40,11 +40,11 @@ int stringToUnsignedInt(char* string)
         neg = TRUE;
         i++;
     }
-    if(string[i]=="+") i++;
+    if(string[i]=='+') i++;
     while(string[i]!='\0')
     {
         res *= 10;
-        res += (int)string[i] - 48;
+        res += (int)string[i++] - 48;
     }
     if(neg) res *= -1;
     return decToUnsignedDec(res);
@@ -59,8 +59,8 @@ void decToBin(int decimal, char* res)
     /*Produces flipped number*/
     while(decimal)
     {
-        if(decimal%2) flipped[i++] = '0';
-        else flipped[i++] = '1';
+        if(decimal%2) flipped[i++] = '1';
+        else flipped[i++] = '0';
         decimal/=2;
     }
     flipped[i] = '\0';
@@ -77,9 +77,8 @@ void decToBin(int decimal, char* res)
 
 void binToOct(char* binary, char* result)
 {
-    char data[3], digit;
-    char res[6];
-    int i = 0, x = 0, index = 0;
+    char data[4];
+    int i = 0, x = 0;
     strcpy(result, "");
     while(binary[i]!='\0')
     {
@@ -88,30 +87,27 @@ void binToOct(char* binary, char* result)
         {
             data[x] = '\0';
             x = 0;
-            digit = getDigitFromBinary(data);
-            res[index++] = digit;
+            getDigitFromBinary(data, result);
         }
     }
-    res[index] = '\0';
-    strcpy(result, res);
 }
 
-char getDigitFromBinary(char* binary)
+void getDigitFromBinary(char* binary, char* target)
 {
-    if(strcmp(binary, "000")==0) return '0';
-    if(strcmp(binary, "001")==0) return '1';
-    if(strcmp(binary, "010")==0) return '2';
-    if(strcmp(binary, "011")==0) return '3';
-    if(strcmp(binary, "100")==0) return '4';
-    if(strcmp(binary, "101")==0) return '5';
-    if(strcmp(binary, "110")==0) return '6';
-    if(strcmp(binary, "111")==0) return '7';
+    if(strcmp(binary, "000")==0) strcat(target, "0");
+    if(strcmp(binary, "001")==0) strcat(target, "1");
+    if(strcmp(binary, "010")==0) strcat(target, "2");
+    if(strcmp(binary, "011")==0) strcat(target, "3");
+    if(strcmp(binary, "100")==0) strcat(target, "4");
+    if(strcmp(binary, "101")==0) strcat(target, "5");
+    if(strcmp(binary, "110")==0) strcat(target, "6");
+    if(strcmp(binary, "111")==0) strcat(target, "7");
 }
 
 int decToUnsignedDec(int number)
 {
     /*Returns the unsigned decimal value of a given number*/
-    if(number<0) return 4096 - number;
+    if(number<0) return 4096 + number;
     else return number;
 }
 
@@ -123,7 +119,7 @@ void dataEncoder(char* data, char* result)
     decToBin(number, temp);
     strcpy(result, "");
     length = strlen(temp);
-    for(i=0; i<(16-length); i++)
+    for(i=0; i<(15-length); i++)
     {
         strcat(result, "0");
     }
@@ -133,12 +129,12 @@ void dataEncoder(char* data, char* result)
 void charEncoder(char c, char* result)
 {
     /*Returns the binary representation of a character ASCII code*/
-    int ascii_char = c, length, i;
+    int ascii_char = (int)c, length, i;
     char temp[16];
     decToBin(ascii_char, temp);
     strcpy(result, "");
     length = strlen(temp);
-    for(i=0; i<(16-length); i++)
+    for(i=0; i<(15-length); i++)
     {
         strcat(result, "0");
     }
@@ -150,12 +146,12 @@ void generateInstructionCode(char* operator, char* src, char* dest, char* result
     /*Generates binary code for the given instruction*/
     char are[] = "100", binOpCode[5];
     int srcType, destType;
-    int i;
     srcType = operandType(src);
     destType = operandType(dest);
     getOperatorBinary(operator, binOpCode);
     /*Get the binary code of the operand*/
     strcpy(result, binOpCode);
+
     /*Add the addressing type of the source operand*/
     if(strcmp(src, NO_VALUE))
     {
@@ -163,12 +159,16 @@ void generateInstructionCode(char* operator, char* src, char* dest, char* result
         {
             case NUMBER:
                 strcat(result, "0001");
+                break;
             case LABEL:
                 strcat(result, "0010");
+                break;
             case INDIR_REGISTER:
                 strcat(result, "0100");
+                break;
             case DIR_REGISTER:
                 strcat(result, "1000");
+                break;
         }
     }
     else
@@ -183,12 +183,16 @@ void generateInstructionCode(char* operator, char* src, char* dest, char* result
         {
             case NUMBER:
                 strcat(result, "0001");
+                break;
             case LABEL:
                 strcat(result, "0010");
+                break;
             case INDIR_REGISTER:
                 strcat(result, "0100");
+                break;
             case DIR_REGISTER:
                 strcat(result, "1000");
+                break;
         }
     }
     else
@@ -236,7 +240,8 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
                 strcat(result, binOper);
                 break;
             case DIR_REGISTER:
-                decToBin(operand[1], binOper);
+                /*Create the binary code for the register based on the register number*/
+                getRegNumBinary(operand[1], binOper);
                 strcat(result, header);
                 if(operandPlace==OPERAND1)
                 {
@@ -248,10 +253,10 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
                     strcat(result, "000");
                     strcat(result, binOper);
                 }
-                /*Create the binary code for the register based on the register number*/
                 break;
             case INDIR_REGISTER:
-                decToBin(operand[2], binOper);
+                /*Create the binary code for the register based on the register number*/
+                getRegNumBinary(operand[2], binOper);
                 strcat(result, header);
                 if(operandPlace==OPERAND1)
                 {
@@ -263,7 +268,6 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
                     strcat(result, "000");
                     strcat(result, binOper);
                 }
-                /*Create the binary code for the register based on the register number*/
                 break;
         }
         strcat(result, are);
@@ -273,7 +277,7 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
 void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
 {
     int r1_type, r2_type;
-    char r1_code[3], r2_code[3];
+    char r1_code[4], r2_code[4];
     char header[] = "000000";
 
     r1_type = operandType(reg1);
@@ -281,20 +285,20 @@ void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
     
     if(r1_type==DIR_REGISTER)
     {
-        decToBin(reg1[1], r1_code);
+        getRegNumBinary(reg1[1], r1_code);
     }
     else if(r1_type==INDIR_REGISTER)
     {
-        decToBin(reg1[2], r1_code);
+        getRegNumBinary(reg1[2], r1_code);
     }
 
     if(r2_type==DIR_REGISTER)
     {
-        decToBin(reg2[1], r2_code);
+        getRegNumBinary(reg2[1], r2_code);
     }
     else if(r2_type==INDIR_REGISTER)
     {
-        decToBin(reg2[2], r2_code);
+        getRegNumBinary(reg2[2], r2_code);
     }
 
     strcpy(result, header);
@@ -330,7 +334,7 @@ int operatorType(char* operator)
 	{
 		return GROUP_3;
 	}
-	
+	else return 9;
 }
 
 void getOperatorBinary(char* operator, char* result)
@@ -371,6 +375,19 @@ int getOperatorNumber(char* operator)
 	else if(strcmp(operator, "jsr")==0) return JSR;
 	else if(strcmp(operator, "rts")==0) return RTS;
 	else if(strcmp(operator, "stop")==0) return STOP;
+	else return 9;
+}
+
+void getRegNumBinary(char regNum, char* result)
+{
+    if(regNum=='0') strcpy(result, "000");
+    if(regNum=='1') strcpy(result, "001");
+    if(regNum=='2') strcpy(result, "010");
+    if(regNum=='3') strcpy(result, "011");
+    if(regNum=='4') strcpy(result, "100");
+    if(regNum=='5') strcpy(result, "101");
+    if(regNum=='6') strcpy(result, "110");
+    if(regNum=='7') strcpy(result, "111");
 }
 
 int operandType(char* operand)

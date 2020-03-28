@@ -8,15 +8,14 @@
 int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine)
 {
     int x = 0, i = 0, j = 0;
-    int labelFlag, contFlag, operandPlace, operatorGroup;
-    int lineCount, lblAddr = 0;
-    int pass = TRUE, parsed;
+    int labelFlag, contFlag;
+    int lblAddr = 0;
+    int pass = TRUE;
     char s;
     char are[] = "000";
     char temp[MAX_INPUT], word[MAX_INPUT];
     char code[16];
     symbolLine* symNode;
-    outputLine* outNode;
     dataLine* dNode;
 
     /*Set file pointer to start of file*/
@@ -26,7 +25,6 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
     while(i<lineCount)
     {
         contFlag = FALSE;
-        parsed = FALSE;
         s = fgetc(file);
 
         /*Skip all whitespaces in the beginning of the line and check if line is empty*/

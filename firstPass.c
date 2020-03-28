@@ -11,12 +11,12 @@ TODO: Add correct handling of empty head elements of linked lists in EACH sectio
 
 int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine* outLine, dataLine* dLine, int* outerIC, int* outerDC)
 {
-    int IC = 100, DC = 0, x = 0, i = 0, j = 0;
+    int IC = 100, DC = 0, x = 0, i = 1, j = 0;
     int labelFlag, contFlag, operandPlace, operatorGroup;
-    int lineCount, lblAddr = 0;
-    int pass = TRUE, parsed;
+    int lblAddr = 0;
+    int pass = TRUE, parsed, place;
     int firstQuote, lastQuote;
-    char instructionCodes[3][MAX_INPUT], place;
+    char instructionCodes[3][MAX_INPUT];
     char s;
     char are[] = "000";
     char temp[MAX_INPUT], word[MAX_INPUT], currLabel[MAX_INPUT];
@@ -217,17 +217,17 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine* symLine, outputLine
                             }
                             /*Finding the first last quote sign location*/
                             x = 0;
-                            while(temp[x]!="\0")
+                            while(temp[x]!='\0')
                             {
-                                if(temp[x]=="\"")
+                                if(temp[x]=='\"')
                                 {
                                     firstQuote = x++;
                                     break;
                                 }
 	                        }
-                            while(temp[x]!="\0")
+                            while(temp[x]!='\0')
                             {
-                                if(temp[x]=="\"") lastQuote = x++;
+                                if(temp[x]=='\"') lastQuote = x++;
 	                        }
                             for(x = firstQuote+1; x<lastQuote; x++)
                             {

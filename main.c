@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 {
     char inputFile[FILENAME_MAX];
     char *parsedFile;
-    int pass_1 = FALSE, pass_2 = FALSE, passNumber = 1;
+    int pass_1 = FALSE, pass_2 = FALSE;
     int i, lineCount;
     int IC, DC;
     FILE *file;
@@ -23,6 +23,9 @@ int main(int argc, char* argv[])
     symbolLine *symLine = NULL; /*TODO: Destroy after finishing*/
     outputLine *outLine = NULL; /*TODO: Destroy after finishing*/
     dataLine *dLine = NULL; /*TODO: Destroy after finishing*/
+    symbolLine *sNode = NULL; /*TODO: Destroy after finishing*/
+    outputLine *oNode = NULL; /*TODO: Destroy after finishing*/
+    dataLine *dNode = NULL; /*TODO: Destroy after finishing*/
 
     if(argc==1)
     {
@@ -48,9 +51,10 @@ int main(int argc, char* argv[])
         /*Collect the input from the file*/
         pass_1 = readLinesFirstRun(file, lineCount, symLine, outLine, dLine, &IC, &DC);
         if(pass_1){
+            printf("File %s completed first pass\n", parsedFile);
             pass_2 = readLinesSecondRun(file, lineCount, symLine, outLine, dLine);
         }
-        else printf("File %s failed on first pass\n", parsedFile);
+        else printf("Error: File %s failed on first pass\n", parsedFile);
 
         if(pass_2)
         {  
@@ -65,5 +69,26 @@ int main(int argc, char* argv[])
     }
 
     /*Free all the structures that use dynamic memory*/
+    sNode = symLine;
+    while(symLine)
+    {
+        sNode = symLine->next;
+        free(symLine);
+        symLine = sNode;
+    }
+    oNode = outLine;
+    while(outLine)
+    {
+        oNode = outLine->next;
+        free(outLine);
+        outLine = oNode;
+    }
+    dNode = dLine;
+    while(dLine)
+    {
+        dNode = dLine->next;
+        free(dLine);
+        dLine = dNode;
+    }
     return 0;
 }

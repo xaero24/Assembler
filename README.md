@@ -22,12 +22,12 @@ Note that the filenames are of the .as files you want to parse, WITHOUT the .as 
 [X] Parsers - update the utilities functions
 [X] Validation - update validators
 [] File creation
-[] Memory deletion
+[X] Memory deletion
 [] Update the makefile from tests/assembler to assembler
-[] Update fully the secondRun.c file based on the firstRun.c file
+[X] Update fully the secondRun.c file based on the firstRun.c file
 [] Write test files
-[] Update addresses from labels after second run
+[X] Update addresses from labels after second run
 [] Convert code to octal (after second run it will be easier)
-[] Save or derive numbers of instruction and data frames for .ob file header
-[] Remove unneeded variables in first and second run
-[] Update function definitions
+[X] Save or derive numbers of instruction and data frames for .ob file header
+[X] Remove unneeded variables in first and second run
+[X] Update function definitions

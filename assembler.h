@@ -59,28 +59,28 @@
 #define FALSE 0
 
 /*Symbol table structure*/
-typedef struct
+typedef struct sym_line
 {
     char type[MAX_INPUT];
     char label[MAX_INPUT];
     int address;
-    symbolLine *next;
+    struct sym_line *next;
 } symbolLine;
 
 /*Data table structure*/
-typedef struct
+typedef struct data_line
 {
     int address;
     char code[MAX_INPUT];
-    dataLine *next;
+    struct data_line *next;
 } dataLine;
 
 /*Output table structure*/
-typedef struct
+typedef struct out_line
 {
     int address;
     char code[MAX_INPUT];
-    outputLine *next;
+    struct out_line *next;
 } outputLine;
 
 /*Function definitions*/
@@ -91,6 +91,7 @@ int lineCounter(FILE *file);
 int stringToUnsignedInt(char* string);
 void decToBin(int decimal, char* res);
 void binToOct(char* binary, char* result);
+void getDigitFromBinary(char* binary, char* target);
 int decToUnsignedDec(int number);
 void dataEncoder(char* data, char* result);
 void charEncoder(char c, char* result);
@@ -100,6 +101,7 @@ void generateOpcodeDualRegs(char* reg1, char* reg2, char* result);
 int operatorType(char* operator);
 void getOperatorBinary(char* operator, char* result);
 int getOperatorNumber(char* operator);
+void getRegNumBinary(char regNum, char* result);
 int operandType(char* operand);
 
 int isDigit(char x);
