@@ -17,11 +17,8 @@ sub    r0,   *r7
 ;Loop of something
 L1: cmp   r2, *r3
                 inc *r3
-<<<<<<< HEAD:input_output/InputOutput3/input3.as
-add #-19,     DATA
-=======
 add  #-19,   DATA
->>>>>>> d731d2ac94d11bcbfcf4667505589152bca91cfe:input_output_files/test.as
+
 jsr    SUBR
     jsr     f2
     jmp L1

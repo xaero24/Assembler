@@ -1,0 +1,22 @@
+Line 1: Comment line
+Line 2: Empty line
+Line 4: Incorrect addressing method was used for operator "add"
+Line 6: Incorrect operand "" was used
+Line 8: Illegal label format for label "LOOP.2"
+Line 14: Duplicate label "LABEL"
+Line 16: Duplicate label "Main"
+Line 18: Incorrect addressing method was used for operator "lea"
+Line 19: Incorrect operand "5" was used
+Line 20: Too many operands provided for operator "stop"
+Line 21: Incorrect operand "Main#5" was used
+Line 22: Incorrect operand "#" was used
+Line 24: Invalid string definition or extra data after string in ""ggregtrhgthc"
+Line 27: Too many operands provided for operator "cmp"
+Line 28: Incorrect operand "&r5" was used
+Line 29: Too many operands provided for operator "jmp"
+Line 31: Illegal label format for label "jmp"
+Line 32: Incorrect operator "laBel12djewoijdweoijewodjedjejd" was used, line skipped
+Error: File input_output/InputOutput2/input2 failed on first pass
+Error:
+Could not process the file: input_output/InputOutput2/input2.as
+
