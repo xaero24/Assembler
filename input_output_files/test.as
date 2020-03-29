@@ -17,7 +17,7 @@ sub    r0,   *r7
 ;Loop of something
 L1: cmp   r2, *r3
                 inc *r3
-add DATA   , #-19
+add  #-19,   DATA
 jsr    SUBR
     jsr     f2
     jmp L1
