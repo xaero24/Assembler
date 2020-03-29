@@ -3,7 +3,7 @@ Authors:
 Karin Yurchenko ID: 204334601
 David Eliyahu Mashiah ID:318183803
 
-This file contains utility parsing functions
+This file contains utility functions for parsing the code.
 */
 #include <stdlib.h>
 #include <stdio.h>

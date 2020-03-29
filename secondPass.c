@@ -3,7 +3,8 @@ Authors:
 Karin Yurchenko ID: 204334601
 David Eliyahu Mashiah ID:318183803
 
-This file gets the data from the first file read, and converts it into bits. 
+This file gets the data from the first file read and adds missing label addresses and entry points.
+Another function of this file is to create the .ext file and populate it.
 */
 #include <stdlib.h>
 #include <stdio.h>

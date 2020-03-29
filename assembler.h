@@ -1,4 +1,11 @@
-/**/
+/*
+Authors:
+Karin Yurchenko ID: 204334601
+David Eliyahu Mashiah ID:318183803
+
+In this file the definitions of different variables are kept.
+Also the functions and data structures are defined in this file.
+*/
 
 #ifndef ASSEMBLER_H_
 #define ASSEMBLER_H_
