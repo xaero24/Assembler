@@ -5,7 +5,7 @@
 .extern   f1 f2       TAG
 MAIN:    mov  START   , r0
          mov DATA ,  r1
-add r1,  #230
+add #230  , r1
 lea                f1, r4
 
 START:     lea     DATA, r5
