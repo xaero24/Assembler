@@ -5,10 +5,6 @@
 #include <string.h>
 #include "assembler.h"
 
-/*
-TODO: Add correct handling of empty head elements of linked lists in EACH section where it may be relevant.
-*/
-
 int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLine** outLine, dataLine** dLine, int* outerIC, int* outerDC)
 {
     int IC = 100, DC = 0, x = 0, i = 0, j = 0;
@@ -161,8 +157,10 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                             {
                                 pass = FALSE;
                                 printf("Line %d: Invalid data item \"%s\"\n", i+1, temp);
+                                continue;
                             }
 
+                            /*Append the number to the dataframe*/
                             if(*dLine==NULL)
                             {
                                 *dLine = (dataLine*)malloc(sizeof(dataLine));
@@ -221,23 +219,27 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                             if(!isValidString(temp))
                             {
                                 pass = FALSE;
-                                printf("Line %d: Invalid string definition or extra data after string in \'%s\'\n", i+1, temp);
+                                printf("Line %d: Invalid string definition or extra data after string in \"%s\"\n", i+1, temp);
+                                break;
                             }
-                            /*Finding the first last quote sign location*/
+                            /*Finding the first and last quote sign location*/
                             x = 0;
                             while(temp[x]!='\0')
                             {
                                 if(temp[x]=='\"')
                                 {
-                                    firstQuote = x++;
+                                    firstQuote = x;
                                     break;
                                 }
+                                x++;
 	                        }
                             while(temp[x]!='\0')
                             {
                                 if(temp[x]=='\"') lastQuote = x;
                                 x++;
 	                        }
+
+                            /*Append each character to the dataframe*/
                             for(x = firstQuote+1; x<lastQuote; x++)
                             {
                                 if(*dLine==NULL)
@@ -306,6 +308,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                             }
                             temp[x] = '\0';
                             
+                            /*Add label to the symbol table*/
                             if(*symLine==NULL)
                             {
                                 *symLine = (symbolLine*)malloc(sizeof(symbolLine));
@@ -324,13 +327,12 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                         continue;
                     }
 
-                    /*If neither, skip the row and print error*/
+                    /*If neither, skip the line and print error*/
                     else
                     {
                         pass = FALSE;
                         printf("Line %d: Bad definition of instruction \"%s\"\n", i+1, word);
-                        while (s!='\n' && s!=EOF)
-                            s = fgetc(file);
+                        while (s!='\n' && s!=EOF) s = fgetc(file);
                     }
                 }
                 
@@ -389,6 +391,9 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                         {
                             pass = FALSE;
                             printf("Line %d: Incorrect operand \"%s\" was used\n", i+1, temp);
+                            while (s!='\n' && s!=EOF) s = fgetc(file);
+                            contFlag = TRUE;
+                            break;
                         }
                         if(operandPlace==OPERAND1)
                         {
@@ -397,6 +402,9 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                                 /*Operators of group 3 have no allowed operands*/
                                 pass = FALSE;
                                 printf("Line %d: Too many operands provided for operator \"%s\"\n", i+1, word);
+                                while (s!='\n' && s!=EOF) s = fgetc(file);
+                                contFlag = TRUE;
+                                break;
                             }
                             strcpy(op1, temp);
                             operandPlace = OPERAND2;
@@ -409,6 +417,9 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                                 /*Operators of group 3 have no allowed operands, and operators of group 2 can have only one operand*/
                                 pass = FALSE;
                                 printf("Line %d: Too many operands provided for operator \"%s\"\n", i+1, word);
+                                while (s!='\n' && s!=EOF) s = fgetc(file);
+                                contFlag = TRUE;
+                                break;
                             }
                             strcpy(op2, temp);
                             operandPlace = OPERAND_3_AND_UP;
@@ -418,8 +429,12 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                             /*No operator can have more than 2 operands*/
                             pass = FALSE;
                             printf("Line %d: Too many operands provided for operator \"%s\"\n", i+1, word);
+                            while (s!='\n' && s!=EOF) s = fgetc(file);
+                            contFlag = TRUE;
+                            break;
                         }
                     }
+                    if(contFlag) break;
 
                     /*In a single-operand instruction we put the operand as the destination operand*/
                     if(operatorGroup==GROUP_2 && strcmp(op2, NO_VALUE)==0)
@@ -433,6 +448,8 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                     {
                         pass = FALSE;
                         printf("Line %d: Incorrect addressing method was used for operator \"%s\"\n", i+1, word);
+                        while (s!='\n' && s!=EOF) s = fgetc(file);
+                        break;
                     }
 
                     /*Generate the operator instruction code*/
@@ -470,7 +487,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                     if(operandType(op2)==NUMBER)
                     {
                         strcpy(are, "100");
-                        generateOperandCode(op2, OPERAND1, are, code, lblAddr);
+                        generateOperandCode(op2, OPERAND2, are, code, lblAddr);
                         strcpy(instructionCodes[2], code);
                     }
                     else if(operandType(op2)==LABEL)
@@ -483,12 +500,12 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                         {
                             strcpy(are, "100");
 
-                            generateOperandCode(op2, OPERAND1, are, code, lblAddr);
+                            generateOperandCode(op2, OPERAND2, are, code, lblAddr);
                             strcpy(instructionCodes[2], code);
                         }
                     }
                     
-                    /*Populate the code table with the instruction's octal values*/
+                    /*Populate the code table with the instruction's binary values*/
                     for(place = 0; place<3; place++)
                     {
                         if(place==2 && parsed==TRUE) break;
@@ -514,7 +531,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
         i++;
     }
     
-    /*Update all DC values to correct IC values*/
+    /*Update all DC values to correct IC+DC values*/
     symNode = *symLine;
     while(symNode)
     {
@@ -524,7 +541,20 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
         }
         symNode = symNode->next;
     }
+    dNode = *dLine;
+    while(dNode)
+    {
+        dNode->address = dNode->address + IC;
+        dNode = dNode->next;
+    }
     *outerIC = IC-100;
     *outerDC = DC;
+
+    /*Since the memory is only 4096 bytes long, any code longer than that will be unusable*/
+    if(*outerIC + *outerDC > 4095)
+    {
+        printf("Error: Memory overflow, last address above 4095.\n");
+        pass = FALSE;
+    }
     return pass;
 }

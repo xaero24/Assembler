@@ -29,9 +29,10 @@ int lineCounter(FILE *file)
     return count;
 }
 
-int stringToUnsignedInt(char* string)
+int stringToUnsignedInt(char* string, char type)
 {
     /*Gets a string representation of a number and converts is to an unsigned integer.*/
+    int val;
     int i = 0, res = 0;
     int neg = FALSE;
     if(string[i]=='#') i++;
@@ -47,14 +48,16 @@ int stringToUnsignedInt(char* string)
         res += (int)string[i++] - 48;
     }
     if(neg) res *= -1;
-    return decToUnsignedDec(res);
+    if(type=='d') val = 32768;
+    else if(type=='o') val = 4096;
+
+    return decToUnsignedDec(res, val);
 }
 
 void decToBin(int decimal, char* res)
 {
-    /*TODO: Might cause a problem with result and flipped arrays*/
-    char result[12];
-    char flipped[12];
+    char result[16];
+    char flipped[16];
     int i = 0, size;
     /*Produces flipped number*/
     while(decimal)
@@ -77,6 +80,7 @@ void decToBin(int decimal, char* res)
 
 void binToOct(char* binary, char* result)
 {
+    /*Converts a binary number to octal*/
     char data[4];
     int i = 0, x = 0;
     strcpy(result, "");
@@ -94,6 +98,7 @@ void binToOct(char* binary, char* result)
 
 void getDigitFromBinary(char* binary, char* target)
 {
+    /*Used for conversion from binary to decimal string of a register number*/
     if(strcmp(binary, "000")==0) strcat(target, "0");
     if(strcmp(binary, "001")==0) strcat(target, "1");
     if(strcmp(binary, "010")==0) strcat(target, "2");
@@ -104,17 +109,17 @@ void getDigitFromBinary(char* binary, char* target)
     if(strcmp(binary, "111")==0) strcat(target, "7");
 }
 
-int decToUnsignedDec(int number)
+int decToUnsignedDec(int number, int limit)
 {
     /*Returns the unsigned decimal value of a given number*/
-    if(number<0) return 4096 + number;
+    if(number<0) return limit + number;
     else return number;
 }
 
 void dataEncoder(char* data, char* result)
 {
     /*Returns the binary representation of a number*/
-    int number = stringToUnsignedInt(data), length, i;
+    int number = stringToUnsignedInt(data, 'd'), length, i;
     char temp[16];
     decToBin(number, temp);
     strcpy(result, "");
@@ -221,7 +226,7 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
         {
             case NUMBER:
                 /*Get the binary value of the operand*/
-                decToBin(stringToUnsignedInt(operand), binOper);
+                decToBin(stringToUnsignedInt(operand, 'o'), binOper);
                 length = strlen(binOper);
                 for(i = 0; i<(12-length); i++)
                 {
@@ -276,6 +281,7 @@ void generateOperandCode(char* operand, int operandPlace, char* are, char* resul
 
 void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
 {
+    /*For instructions with two registers, this function produces a single binary word.*/
     int r1_type, r2_type;
     char r1_code[4], r2_code[4];
     char header[] = "000000";
@@ -283,6 +289,7 @@ void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
     r1_type = operandType(reg1);
     r2_type = operandType(reg2);
     
+    /*Determine the register number*/
     if(r1_type==DIR_REGISTER)
     {
         getRegNumBinary(reg1[1], r1_code);
@@ -301,6 +308,7 @@ void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
         getRegNumBinary(reg2[2], r2_code);
     }
 
+    /*Add 6 trailing zeros, the registers and the ARE field*/
     strcpy(result, header);
     strcat(result, r1_code);
     strcat(result, r2_code);
@@ -309,12 +317,14 @@ void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
 
 int operatorType(char* operator)
 {
+    /*Used for divisoin of operators into 3 groups. Returns 9 as a non-valid input indicator.*/
 	if(	strcmp(operator, "mov")==0 || 
 		strcmp(operator, "cmp")==0 || 
 		strcmp(operator, "add")==0 || 
 		strcmp(operator, "sub")==0 || 
 		strcmp(operator, "lea")==0)
 	{
+        /*2-operand operator*/
 		return GROUP_1;
 	}
 	else if(	strcmp(operator, "clr")==0 || 
@@ -327,11 +337,13 @@ int operatorType(char* operator)
 				strcmp(operator, "prn")==0 || 
 				strcmp(operator, "jsr")==0)
 	{
+        /*1-operand operator*/
 		return GROUP_2;
 	}
 	else if(	strcmp(operator, "rts")==0 || 
 				strcmp(operator, "stop")==0)
 	{
+        /*No-operand operator*/
 		return GROUP_3;
 	}
 	else return 9;
@@ -339,6 +351,7 @@ int operatorType(char* operator)
 
 void getOperatorBinary(char* operator, char* result)
 {
+    /*This function gets the binary code for the operators in use*/
     if(strcmp(operator, "mov")==0) strcpy(result, "0000");
 	else if(strcmp(operator, "cmp")==0) strcpy(result, "0001");
 	else if(strcmp(operator, "add")==0) strcpy(result, "0010");
@@ -359,6 +372,8 @@ void getOperatorBinary(char* operator, char* result)
 
 int getOperatorNumber(char* operator)
 {
+    /*This function gets the decimal code for the operators in use.
+    In case of a bad operator will return 99 as a non-existent command.*/
     if(strcmp(operator, "mov")==0) return MOV;
 	else if(strcmp(operator, "cmp")==0) return CMP;
 	else if(strcmp(operator, "add")==0) return ADD;
@@ -375,11 +390,12 @@ int getOperatorNumber(char* operator)
 	else if(strcmp(operator, "jsr")==0) return JSR;
 	else if(strcmp(operator, "rts")==0) return RTS;
 	else if(strcmp(operator, "stop")==0) return STOP;
-	else return 9;
+	else return 99;
 }
 
 void getRegNumBinary(char regNum, char* result)
 {
+    /*Used for getting exactly 3 digits for any register from 0 to 7*/
     if(regNum=='0') strcpy(result, "000");
     if(regNum=='1') strcpy(result, "001");
     if(regNum=='2') strcpy(result, "010");

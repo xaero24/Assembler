@@ -5,27 +5,30 @@
 #include <string.h>
 #include "assembler.h"
 
-void createFiles(char* ent, char* ext, char* ob, symbolLine* symLine, outputLine* outLine, dataLine* dLine, int IC, int DC)
+void createFiles(char* ent, char* ob, symbolLine* symLine, outputLine* outLine, dataLine* dLine, int IC, int DC)
 {
-    int minAddr;
+    /*This function handles the creation of the output files.*/
     char written[MAX_INPUT];
     char stringIC[4], stringDC[4];
+    char addr[5], octCode[6];
     symbolLine* symNode = symLine;
     outputLine* outNode = outLine;
     dataLine* dNode = dLine;
-    FILE *entFile, *extFile, *obFile;
+    FILE *entFile, *obFile;
     sprintf(stringIC, "%d", IC);
     sprintf(stringDC, "%d", DC);
 
+    /*Entry file creation using the symbol table*/
     entFile = fopen(ent, "w");
     while(symNode)
     {
         if( strcmp(symNode->type, "data-entry")==0 ||
             strcmp(symNode->type, "code-entry")==0 )
         {
+            sprintf(addr, "%04d", symNode->address);
             strcpy(written, symNode->label);
             strcat(written, " ");
-            strcat(written, symNode->address);
+            strcat(written, addr);
             fputs(written, entFile);
             putc('\n', entFile);
         }
@@ -33,33 +36,21 @@ void createFiles(char* ent, char* ext, char* ob, symbolLine* symLine, outputLine
     }
     fclose(entFile);
 
-    extFile = fopen(ext, "w");
-    while(symNode)
-    {
-        if(strcmp(symNode->type, "external")==0)
-        {
-            strcpy(written, symNode->label);
-            strcat(written, " ");
-            strcat(written, symNode->address);
-            fputs(written, extFile);
-            putc('\n', extFile);
-        }
-        symNode = symNode->next;
-    }
-    fclose(extFile);
-
+    /*Object file creation using the codeframe and the dataframe*/
     obFile = fopen(ob, "w");
-        strcpy(written, "   ");
-        strcat(written, stringIC);
-        strcat(written, " ");
-        strcat(written, stringIC);
-        fputs(written, obFile);
-        putc('\n', obFile);
+    strcpy(written, "   ");
+    strcat(written, stringIC);
+    strcat(written, " ");
+    strcat(written, stringDC);
+    fputs(written, obFile);
+    putc('\n', obFile);
     while(outNode)
     {
-        strcpy(written, outNode->address);
+        binToOct(outNode->code, octCode);
+        sprintf(addr, "%04d", outNode->address);
+        strcpy(written, addr);
         strcat(written, " ");
-        strcat(written, outNode->code);
+        strcat(written, octCode);
         fputs(written, obFile);
         putc('\n', obFile);
 
@@ -67,9 +58,11 @@ void createFiles(char* ent, char* ext, char* ob, symbolLine* symLine, outputLine
     }
     while(dNode)
     {
-        strcpy(written, dNode->address);
+        binToOct(dNode->code, octCode);
+        sprintf(addr, "%04d", dNode->address);
+        strcpy(written, addr);
         strcat(written, " ");
-        strcat(written, dNode->code);
+        strcat(written, octCode);
         fputs(written, obFile);
         putc('\n', obFile);
         

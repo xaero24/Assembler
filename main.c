@@ -5,12 +5,6 @@
 #include <string.h>
 #include "assembler.h"
 
-/*
-
-TODO: Remove all todos
-
-*/
-
 int main(int argc, char* argv[])
 {
     char inputFile[FILENAME_MAX];
@@ -21,14 +15,15 @@ int main(int argc, char* argv[])
     int IC, DC;
     FILE *file;
 
-    symbolLine *symLine = NULL; /*TODO: Destroy after finishing*/
-    outputLine *outLine = NULL; /*TODO: Destroy after finishing*/
-    dataLine *dLine = NULL; /*TODO: Destroy after finishing*/
+    symbolLine *symLine = NULL;
+    outputLine *outLine = NULL;
+    dataLine *dLine = NULL;
 
-    symbolLine *sNode = NULL; /*TODO: Destroy after finishing*/
-    outputLine *oNode = NULL; /*TODO: Destroy after finishing*/
-    dataLine *dNode = NULL; /*TODO: Destroy after finishing*/
+    symbolLine *sNode = NULL;
+    outputLine *oNode = NULL;
+    dataLine *dNode = NULL;
 
+    /*No provided files will immediately fail the program*/
     if(argc==1)
     {
         printf("FATAL ERROR: No files to compile\n");
@@ -42,6 +37,7 @@ int main(int argc, char* argv[])
         strcpy(inputFile, argv[i]);
         strcat(inputFile, ".as");
 
+        /*Files are to be given without the .as extension*/
         file = fopen (inputFile, "r");
         if (!file)
         {
@@ -49,14 +45,13 @@ int main(int argc, char* argv[])
             return 0;
         }
         lineCount = lineCounter(file);
-        printf("    Lines: %d\n", lineCount);
+        strcpy(ext, argv[i]);
+        strcat(ext, ".ext");
 
         /*Collect the input from the file*/
         pass_1 = readLinesFirstRun(file, lineCount, &symLine, &outLine, &dLine, &IC, &DC);
         if(pass_1){
-            printf("File %s completed first pass\n", parsedFile);
-            printf("IC is: %d, DC is %d\n", IC, DC);
-            pass_2 = readLinesSecondRun(file, lineCount, symLine, dLine);
+            pass_2 = readLinesSecondRun(file, lineCount, symLine, outLine, ext);
         }
         else printf("Error: File %s failed on first pass\n", parsedFile);
 
@@ -65,15 +60,15 @@ int main(int argc, char* argv[])
             /*Create files from the output*/
             strcpy(ent, argv[i]);
             strcat(ent, ".ent");
-            strcpy(ext, argv[i]);
-            strcat(ext, ".ex");
             strcpy(ob, argv[i]);
             strcat(ob, ".ob");
-            createOutputFiles(ent, ext, ob, symLine, outLine, dLine, IC, DC);
+            createFiles(ent, ob, symLine, outLine, dLine, IC, DC);
             printf("Successfully processed %s.as\n", parsedFile);
         }
         else
         {
+            /*Remove the created .ext file*/
+            remove(ext);
             printf("Error:\nCould not process the file: %s.as\n", parsedFile);
         }
         fclose(file);

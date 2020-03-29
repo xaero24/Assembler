@@ -22,6 +22,8 @@ int isLetter(char x)
 
 int isNumber(char* word, int index)
 {
+	/*The function performs a check on the given number.
+	If the number is to be checked from index 1 (that is, index 0 is #), we perform an extra check to see if the number is really legl - -used for checking the operands.*/
 	int i = index;
 	if(index==1 && word[0]!='#') return FALSE;
 	if(word[i]=='+' || word[i]=='-') i++;
@@ -36,7 +38,7 @@ int isValidString(char* str)
 {
     /*Checks if the string is a correctly formed single string*/
 	int i = 1;
-	int lastQuote;
+	int lastQuote = -1;
 	/*Finding the last quote sign location*/
 	while(str[i]!='\0')
 	{
@@ -44,7 +46,8 @@ int isValidString(char* str)
 		i++;
 	}
 	if(str[0]!='\"') return FALSE;
-
+	if(lastQuote==-1) return FALSE;
+	if(str[sizeof(str) - 1]=='\"') return TRUE;
 	for(i = lastQuote+1; str[i]!='\0'; i++)
 	{
 		if(str[i]!=' ' && str[i]!='\t') return FALSE;
@@ -84,6 +87,8 @@ int isLegalLabel(char* label)
 
 int isExistingLabel(char* label, symbolLine* head)
 {
+	/*Checking if the label exists in the symbol table.
+	Used in the first pass to find duplicate label definitions.*/
 	symbolLine *node = head;
 	int exists = FALSE;
 	while(node!=NULL)
@@ -101,6 +106,7 @@ int isExistingLabel(char* label, symbolLine* head)
 
 int isValidOperator(char* operator)
 {
+	/*Checking the group of each operator and whether it's a valid one or not.*/
 	int valid = TRUE;
 	switch(operatorType(operator))
 	{
@@ -138,7 +144,7 @@ int isValidOperand(char* operand)
 		return TRUE;
 	}
 	/*Check if it's a number*/
-	else if(operand[0]=='#' && isNumber(operand, 1))
+	else if(strlen(operand)>1 && operand[0]=='#' && isNumber(operand, 1))
 	{
 		return TRUE;
 	}
@@ -156,6 +162,7 @@ int isValidOperand(char* operand)
 
 int isValidOperandUse(char* operator, char* op1, char* op2)
 {
+	/*The function checks the operand usage rules according to each operator.*/
 	int operType = getOperatorNumber(operator);
 	int op1_type = operandType(op1), op2_type = operandType(op2);
 	int ok = TRUE;
@@ -196,6 +203,11 @@ int isValidOperandUse(char* operator, char* op1, char* op2)
 		case STOP:
 			if(strcmp(op1, NO_VALUE)!=0) ok = FALSE;
 			if(strcmp(op2, NO_VALUE)!=0) ok = FALSE;
+			break;
+		case CMP:
+			break;
+		default:
+			ok = FALSE;
 			break;
 	}
 	return ok;

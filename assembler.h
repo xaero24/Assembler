@@ -27,7 +27,7 @@
 #define RTS 14
 #define STOP 15
 
-/*Definition of various checks*/
+/*A unique value string is used for signing a no-value content for later parsing*/
 #define NO_VALUE "0-NIL"
 
 /*Definitions of max length for the code parts*/
@@ -61,9 +61,9 @@
 /*Symbol table structure*/
 typedef struct sym_line
 {
+    int address;
     char type[MAX_INPUT];
     char label[MAX_INPUT];
-    int address;
     struct sym_line *next;
 } symbolLine;
 
@@ -84,35 +84,36 @@ typedef struct out_line
 } outputLine;
 
 /*Function definitions*/
-int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLine** outLine, dataLine** dLine, int*, int*);
-int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, dataLine* dLine);
+int readLinesFirstRun(FILE*, int, symbolLine**, outputLine**, dataLine**, int*, int*);
+int readLinesSecondRun(FILE*, int, symbolLine*, outputLine*, char*);
+void createFiles(char*, char*, symbolLine*, outputLine*, dataLine*, int, int);
 
-int lineCounter(FILE *file);
-int stringToUnsignedInt(char* string);
-void decToBin(int decimal, char* res);
-void binToOct(char* binary, char* result);
-void getDigitFromBinary(char* binary, char* target);
-int decToUnsignedDec(int number);
-void dataEncoder(char* data, char* result);
-void charEncoder(char c, char* result);
-void generateInstructionCode(char* operator, char* src, char* dest, char* result);
-void generateOperandCode(char* operand, int operandPlace, char* are, char* result, int lblAddr);
-void generateOpcodeDualRegs(char* reg1, char* reg2, char* result);
-int operatorType(char* operator);
-void getOperatorBinary(char* operator, char* result);
-int getOperatorNumber(char* operator);
-void getRegNumBinary(char regNum, char* result);
-int operandType(char* operand);
+int lineCounter(FILE*);
+int stringToUnsignedInt(char*, char);
+void decToBin(int, char*);
+void binToOct(char*, char*);
+void getDigitFromBinary(char*, char*);
+int decToUnsignedDec(int, int);
+void dataEncoder(char*, char*);
+void charEncoder(char, char*);
+void generateInstructionCode(char*, char*, char*, char*);
+void generateOperandCode(char*, int, char*, char*, int);
+void generateOpcodeDualRegs(char*, char*, char*);
+int operatorType(char*);
+void getOperatorBinary(char*, char*);
+int getOperatorNumber(char*);
+void getRegNumBinary(char, char*);
+int operandType(char*);
 
-int isDigit(char x);
-int isSpace(char x);
-int isLetter(char x);
-int isNumber(char* word, int index);
-int isValidString(char* str);
-int isLegalLabel(char* label);
-int isExistingLabel(char* label, symbolLine* head);
-int isValidOperator(char* operator);
-int isValidOperand(char* operand);
-int isValidOperandUse(char* operator, char* op1, char* op2);
+int isDigit(char);
+int isSpace(char);
+int isLetter(char);
+int isNumber(char*, int);
+int isValidString(char*);
+int isLegalLabel(char*);
+int isExistingLabel(char*, symbolLine*);
+int isValidOperator(char*);
+int isValidOperand(char*);
+int isValidOperandUse(char*, char*, char*);
 
 #endif
