@@ -1,13 +1,11 @@
-;Tester for Maman 14. The described errors are in "Maman14_errors"
-
 NUM: .entry NUM
 add r3,   #4
 cmp #5, #-29
-He45: jsr r3 
+He45: jsr r3
 prn NUM
 LOOP.2: .string "Hello"
 LABEL: .extern LABEL
-LABEL: .data 5  , -25,  -5, 14, 1 
+LABEL: .data 5  , -25,  -5, 14, 1
 .data , 5,   12 ,  -110
 .data 5 ,, 22 , 45
 .data 34  , -100 ,
