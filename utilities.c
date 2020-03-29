@@ -1,5 +1,10 @@
-/**/
+/*
+Authors:
+Karin Yurchenko ID: 204334601
+David Eliyahu Mashiah ID:318183803
 
+This file contains utility parsing functions
+*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -180,7 +185,7 @@ void generateInstructionCode(char* operator, char* src, char* dest, char* result
     {
         strcat(result, "0000");
     }
-    
+
     /*Add the addressing type of the destination operand*/
     if(strcmp(dest, NO_VALUE))
     {
@@ -288,7 +293,7 @@ void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
 
     r1_type = operandType(reg1);
     r2_type = operandType(reg2);
-    
+
     /*Determine the register number*/
     if(r1_type==DIR_REGISTER)
     {
@@ -318,29 +323,29 @@ void generateOpcodeDualRegs(char* reg1, char* reg2, char* result)
 int operatorType(char* operator)
 {
     /*Used for divisoin of operators into 3 groups. Returns 9 as a non-valid input indicator.*/
-	if(	strcmp(operator, "mov")==0 || 
-		strcmp(operator, "cmp")==0 || 
-		strcmp(operator, "add")==0 || 
-		strcmp(operator, "sub")==0 || 
+	if(	strcmp(operator, "mov")==0 ||
+		strcmp(operator, "cmp")==0 ||
+		strcmp(operator, "add")==0 ||
+		strcmp(operator, "sub")==0 ||
 		strcmp(operator, "lea")==0)
 	{
         /*2-operand operator*/
 		return GROUP_1;
 	}
-	else if(	strcmp(operator, "clr")==0 || 
-				strcmp(operator, "not")==0 || 
-				strcmp(operator, "inc")==0 || 
-				strcmp(operator, "dec")==0 || 
-				strcmp(operator, "jmp")==0 || 
-				strcmp(operator, "bne")==0 || 
-				strcmp(operator, "red")==0 || 
-				strcmp(operator, "prn")==0 || 
+	else if(	strcmp(operator, "clr")==0 ||
+				strcmp(operator, "not")==0 ||
+				strcmp(operator, "inc")==0 ||
+				strcmp(operator, "dec")==0 ||
+				strcmp(operator, "jmp")==0 ||
+				strcmp(operator, "bne")==0 ||
+				strcmp(operator, "red")==0 ||
+				strcmp(operator, "prn")==0 ||
 				strcmp(operator, "jsr")==0)
 	{
         /*1-operand operator*/
 		return GROUP_2;
 	}
-	else if(	strcmp(operator, "rts")==0 || 
+	else if(	strcmp(operator, "rts")==0 ||
 				strcmp(operator, "stop")==0)
 	{
         /*No-operand operator*/

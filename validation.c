@@ -1,4 +1,10 @@
-/**/
+/*
+Authors:
+Karin Yurchenko ID: 204334601
+David Eliyahu Mashiah ID:318183803
+
+This file validates the syntax of the input file.
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -93,7 +99,7 @@ int isExistingLabel(char* label, symbolLine* head)
 	int exists = FALSE;
 	while(node!=NULL)
 	{
-		if(	strcmp(label, node->label)==0 && 
+		if(	strcmp(label, node->label)==0 &&
 			(strcmp(node->type, "data")==0 ||
 			strcmp(node->type, "code")==0) )
 		{
@@ -157,7 +163,7 @@ int isValidOperand(char* operand)
 	{
 		return FALSE;
 	}
-	
+
 }
 
 int isValidOperandUse(char* operator, char* op1, char* op2)

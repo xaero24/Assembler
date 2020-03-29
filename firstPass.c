@@ -1,4 +1,11 @@
-/**/
+/*
+Authors:
+Karin Yurchenko ID: 204334601
+David Eliyahu Mashiah ID:318183803
+
+This file parses a specific assembly language.
+It saves the data from an assembly file in data structures, and finds the errors.
+*/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -115,7 +122,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                 {
                     /*The current word is a .something instruction.
                     We determine the type of the instruction and put it into the correct place.*/
-                    
+
                     /*Check if data*/
                     if (strcmp(".data", word)==0)
                     {
@@ -307,7 +314,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                                 s = fgetc(file);
                             }
                             temp[x] = '\0';
-                            
+
                             /*Add label to the symbol table*/
                             if(*symLine==NULL)
                             {
@@ -335,7 +342,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                         while (s!='\n' && s!=EOF) s = fgetc(file);
                     }
                 }
-                
+
                 else
                 {
                     /*This is an operator.*/
@@ -504,7 +511,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
                             strcpy(instructionCodes[2], code);
                         }
                     }
-                    
+
                     /*Populate the code table with the instruction's binary values*/
                     for(place = 0; place<3; place++)
                     {
@@ -530,7 +537,7 @@ int readLinesFirstRun(FILE* file, int lineCount, symbolLine** symLine, outputLin
         }
         i++;
     }
-    
+
     /*Update all DC values to correct IC+DC values*/
     symNode = *symLine;
     while(symNode)

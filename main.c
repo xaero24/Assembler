@@ -1,4 +1,12 @@
-/**/
+/*
+Authors:
+Karin Yurchenko ID: 204334601
+David Eliyahu Mashiah ID:318183803
+
+The main file.
+This file manages the assembling proccess.
+It calls the first and second read methods, and then creates the output files.
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +64,7 @@ int main(int argc, char* argv[])
         else printf("Error: File %s failed on first pass\n", parsedFile);
 
         if(pass_2)
-        {  
+        {
             /*Create files from the output*/
             strcpy(ent, argv[i]);
             strcat(ent, ".ent");

@@ -1,4 +1,10 @@
-/**/
+/*
+Authors:
+Karin Yurchenko ID: 204334601
+David Eliyahu Mashiah ID:318183803
+
+This file handles the creation of the output files according to the given input file/s. 
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -65,7 +71,7 @@ void createFiles(char* ent, char* ob, symbolLine* symLine, outputLine* outLine, 
         strcat(written, octCode);
         fputs(written, obFile);
         putc('\n', obFile);
-        
+
         dNode = dNode->next;
     }
     fclose(obFile);

@@ -1,6 +1,6 @@
 assembler: firstPass.o secondPass.o validation.o main.o utilities.o createFiles.o
 	gcc -g -ansi -Wall validation.o firstPass.o secondPass.o main.o utilities.o createFiles.o -lm -pedantic -o assembler
-
+	make clean 
 
 validation.o: validation.c assembler.h
 	gcc -c -g -ansi validation.c -lm -Wall -pedantic -o validation.o 

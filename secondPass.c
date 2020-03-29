@@ -1,5 +1,10 @@
-/**/
+/*
+Authors:
+Karin Yurchenko ID: 204334601
+David Eliyahu Mashiah ID:318183803
 
+This file gets the data from the first file read, and converts it into bits. 
+*/
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -143,7 +148,7 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
                         continue;
                     }
                 }
-                
+
                 else
                 {
                     /*This is an operator.*/
@@ -223,7 +228,7 @@ int readLinesSecondRun(FILE* file, int lineCount, symbolLine* symLine, outputLin
 
                             /*Generating the new code for the updated label with the address*/
                             generateOperandCode(temp, OPERAND1, are, code, lblAddr);
-                            
+
                             outNode = outLine;
                             while(outNode)
                             {
