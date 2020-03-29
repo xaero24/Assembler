@@ -63,38 +63,38 @@ int main(int argc, char* argv[])
             strcpy(ob, argv[i]);
             strcat(ob, ".ob");
             createFiles(ent, ob, symLine, outLine, dLine, IC, DC);
-            printf("Successfully processed %s.as\n", parsedFile);
+            printf("Successfully processed %s.as\n\n", parsedFile);
         }
         else
         {
             /*Remove the created .ext file*/
             remove(ext);
-            printf("Error:\nCould not process the file: %s.as\n", parsedFile);
+            printf("Error:\nCould not process the file: %s.as\n\n", parsedFile);
         }
         fclose(file);
-    }
 
-    /*Free all the structures that use dynamic memory*/
-    sNode = symLine;
-    while(symLine)
-    {
-        sNode = symLine->next;
-        free(symLine);
-        symLine = sNode;
-    }
-    oNode = outLine;
-    while(outLine)
-    {
-        oNode = outLine->next;
-        free(outLine);
-        outLine = oNode;
-    }
-    dNode = dLine;
-    while(dLine)
-    {
-        dNode = dLine->next;
-        free(dLine);
-        dLine = dNode;
+        /*Free all the structures that use dynamic memory*/
+        sNode = symLine;
+        while(symLine)
+        {
+            sNode = symLine->next;
+            free(symLine);
+            symLine = sNode;
+        }
+        oNode = outLine;
+        while(outLine)
+        {
+            oNode = outLine->next;
+            free(outLine);
+            outLine = oNode;
+        }
+        dNode = dLine;
+        while(dLine)
+        {
+            dNode = dLine->next;
+            free(dLine);
+            dLine = dNode;
+        }
     }
     return 0;
 }
