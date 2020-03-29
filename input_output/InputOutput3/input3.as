@@ -1,6 +1,6 @@
 ;Comment line just for shows
-      
-  
+
+
      .entry     MAIN       START
 .extern   f1 f2       TAG
 MAIN:    mov  START   , r0
@@ -17,7 +17,7 @@ sub    r0,   *r7
 ;Loop of something
 L1: cmp   r2, *r3
                 inc *r3
-add DATA   , #-19
+add #-19,     DATA
 jsr    SUBR
     jsr     f2
     jmp L1
