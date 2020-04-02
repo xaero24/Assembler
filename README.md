@@ -18,6 +18,6 @@ Note that the filenames are of the .as files you want to parse, WITHOUT the .as 
 Some test files, as given by other members of team, are in the "tests" dir.
 
 ## TODO:
-[X] create output files
-[X] Compile on ubuntu
-[X] Zip 
+1. [X] create output files
+2. [X] Compile on ubuntu
+3. [X] Zip 
