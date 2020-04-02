@@ -1,4 +1,4 @@
-### Assembler
+# Assembler
 
 For your consideration, a simple assembler - without linking - that parses a list of files.
 The output code is 3 files in case of success:
@@ -6,7 +6,7 @@ The output code is 3 files in case of success:
 .ex for for external tag references
 .ob with the octal code for each parsed code line.
 
-# How to run:
+## How to run:
 From the project root (where the makefile is located) run:
 ```
 $ make
@@ -17,7 +17,7 @@ Note that the filenames are of the .as files you want to parse, WITHOUT the .as 
 
 Some test files, as given by other members of team, are in the "tests" dir.
 
-# TODO:
+## TODO:
 [X] create output files
 [X] Compile on ubuntu
 [X] Zip 
